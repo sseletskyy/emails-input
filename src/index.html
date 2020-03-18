@@ -11,9 +11,55 @@
     />
   </head>
   <body>
-  	<form>
-		<h2>Share Board Name with others</h2>
-	</form>
-    <script src="main.js"></script>
+    <div class="container">
+      <div class="emails-input-panel">
+        <div class="header">
+          <div class="header-container">
+            <div class="title">
+              Share <strong>Board Name</strong> with others
+            </div>
+            <div class="emails-input">
+              <div class="email email--state-valid">
+                john@miro.com<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-invalid">
+                michael@miro<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-valid">
+                john@miro.com<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-invalid">
+                michael@miro<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-valid">
+                john@miro.com<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-invalid">
+                michael@miro<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-valid">
+                john@miro.com<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-invalid">
+                michael@miro<span class="delete">&#10005;</span>
+              </div>
+              <input
+                class="email email--state-input"
+                placeholder="add more people..."
+                type="text"
+              />
+            </div>
+			  <br/>
+            <div id="emails-input" class="emails-input"></div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="footer-container">
+            <button class="button">Add Email</button>
+            <button class="button">Get Emails Count</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

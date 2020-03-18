@@ -19,13 +19,13 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.less$/,
-        loader: 'less-loader', // compiles Less to CSS
-      },
-      {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+      },
+      {
+        test: /\.less$/,
+        use: ['style-loader', 'css-loader', 'less-loader'],
       },
     ],
   },
