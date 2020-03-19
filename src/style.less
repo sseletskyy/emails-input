@@ -37,7 +37,7 @@
 
     .button {
       background: #4262ff;
-	  margin-right: 10px;
+      margin-right: 10px;
       border-radius: 6px;
       padding: 8px 16px;
       font-family: @fontFamily;
@@ -65,7 +65,7 @@
 
   .email {
     display: inline-block;
-	margin: 2px 0;
+    margin: 2px 0;
     padding: 5px 10px 5px 12px;
     font-family: @fontFamily;
     font-style: normal;
@@ -77,7 +77,7 @@
 
     .delete {
       margin-left: 8px;
-	  cursor: pointer;
+      cursor: pointer;
     }
   }
   .email--state-valid {
@@ -90,24 +90,25 @@
 
   .email--state-input {
     border: none; // 1px solid gray;
-    padding-left: 0;
+    padding-left: 8px;
+    text-align: left;
     &::-webkit-input-placeholder {
       text-align: left;
       color: #c3c2cf;
     }
     ::-moz-placeholder {
-	  text-align: left;
-	  color: #c3c2cf;
+      text-align: left;
+      color: #c3c2cf;
     }
     :-ms-input-placeholder {
-	  text-align: left;
-	  color: #c3c2cf;
+      text-align: left;
+      color: #c3c2cf;
     }
-	&:focus {
-	  box-shadow: none;
-	  border: none; // 1px solid #c3c2cf;
-	  outline: none;
-	  text-align: left;
-	}
+    &:focus {
+      box-shadow: none;
+      border: none; // 1px solid #c3c2cf;
+      outline: none;
+      text-align: left;
+    }
   }
 }
