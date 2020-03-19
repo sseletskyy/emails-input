@@ -3,13 +3,16 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.ts',
+  entry: {
+    index: './src/index.ts',
+    'emails-input': './src/emails-input/emails-input.ts',
+  },
   mode: 'development',
   resolve: {
     extensions: ['.ts', '.js'],
   },
   output: {
-    filename: 'main.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
   devtool: 'inline-source-map',

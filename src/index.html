@@ -49,8 +49,15 @@
                 type="text"
               />
             </div>
-			  <br/>
+            <br />
             <div id="emails-input" class="emails-input"></div>
+            <script src="emails-input.bundle.js"></script>
+            <script>
+              const emailInput = EmailsInput(
+                document.querySelector('#emails-input')
+              );
+              emailInput.setEmails(['mike@miro.com', 'incorrect']);
+            </script>
           </div>
         </div>
         <div class="footer">
