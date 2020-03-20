@@ -22,7 +22,7 @@ describe('EmailNode', () => {
       it('expects string as an argument', () => {
         expect(() => {
           // noinspection JSCheckFunctionSignatures
-			EmailNode.create(123);
+          EmailNode.create(123);
         }).toThrowError(
           new Error('EmailNode : create method expects a string as an argument')
         );
@@ -54,6 +54,20 @@ describe('EmailNode', () => {
         it('should return object with key email with removed comma in final email text', () => {
           const { email } = EmailNode.create(EMAIL_ENDING_WITH_COMMA);
           expect(email).toEqual(EMAIL_ENDING_WITH_NO_COMMA);
+        });
+      });
+      describe('data attributes', () => {
+        it('should set data-email', () => {
+          const { div } = EmailNode.create(EMAIL_ENDING_WITH_COMMA);
+          expect(div.getAttribute('data-email')).toEqual(
+            EMAIL_ENDING_WITH_NO_COMMA
+          );
+        });
+        it('should set data-valid according to email validation', () => {
+          const { div } = EmailNode.create(EMAIL_ENDING_WITH_COMMA);
+          expect(div.getAttribute('data-valid')).toEqual('true');
+          const { div: invalidDiv } = EmailNode.create(INVALID_EMAIL);
+          expect(invalidDiv.getAttribute('data-valid')).toEqual('false');
         });
       });
     });

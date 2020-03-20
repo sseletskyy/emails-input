@@ -1,6 +1,6 @@
 import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
-import {validateEmail} from "./utils";
+import { validateEmail } from './utils';
 
 // custom events
 export const COMPLETE_INPUT = 'emails-input--complete-input-node';
@@ -66,8 +66,15 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
 
   const _deleteTargetEmail: EventListener = (event: CustomEvent) => {
     const target = event.target as HTMLDivElement;
+    const { parentElement: emailNode } = target;
+    // remove email from emailList
+    const email = emailNode.getAttribute('data-email');
+    const emailIndex = emailList.indexOf(email);
+    if (emailIndex >= 0) {
+      emailList.splice(emailIndex, 1);
+    }
+    // remove email node
     target.parentElement.remove();
-    // TODO remove email
   };
 
   const _onKeyUp: EventListener = (event: KeyboardEvent) => {
@@ -122,13 +129,16 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   const setEmails = (emails: string[]): void => {
     _validateIncomingEmails(emails);
     _clearChildren();
+    emailList = [];
     emails.forEach(email => {
       const { div: item, email: finalEmailString } = EmailNode.create(email);
       containerNode.appendChild<HTMLDivElement>(item);
       // add the same email string (as it is in email node) to emailList
       emailList.push(finalEmailString);
     });
-    containerNode.appendChild<HTMLInputElement>(InputNode.create());
+    containerNode
+      .appendChild<HTMLInputElement>(InputNode.create())
+      .scrollIntoView();
   };
 
   // call constructor before returning API

@@ -35,10 +35,12 @@ const EmailNodeFn = (): EmailNodeAPI => {
     div.appendChild(t);
 
     // check email and decide which css class to use
-    const stateClass = validateEmail(noEndingComma)
-      ? 'email--state-valid'
-      : 'email--state-invalid';
+    const isValid = validateEmail(noEndingComma);
+    const stateClass = isValid ? 'email--state-valid' : 'email--state-invalid';
     div.className = `email ${stateClass}`;
+    // set data attributes for re-usage
+    div.setAttribute('data-email', noEndingComma);
+    div.setAttribute('data-valid', String(isValid));
     const span = document.createElement('span');
     span.innerHTML = '&#10005';
     span.className = 'delete';

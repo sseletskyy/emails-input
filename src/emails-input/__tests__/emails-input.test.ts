@@ -1,6 +1,7 @@
 import { EmailsInput, EmailsInputAPI, COMPLETE_INPUT } from '../emails-input';
 import { getChildren } from '../test-helper';
-
+// scrollIntoView is not supported by jsdom
+window.HTMLElement.prototype.scrollIntoView = function() {};
 const sandbox = (additionalTags: string = '') => {
   document.body.innerHTML = `
 <div id="emails-input"></div>
@@ -30,7 +31,7 @@ describe('EmailsInput', () => {
       instance = EmailsInput(divContainer);
     });
     it('initially should generate an input node', () => {
-      const children = Array.from(divContainer.children);
+      const children = getChildren(divContainer);
       expect(children.length).toEqual(1);
       checkNodeIsAnInput(children[0]);
     });
@@ -193,6 +194,26 @@ describe('EmailsInput', () => {
           expect(children[0].innerHTML).toContain(VALID_EMAIL);
         });
       });
+      describe('when email node is deleted', () => {
+        it('emailsList should be updated', () => {
+          // arrange
+          instance.setEmails([VALID_EMAIL, INVALID_EMAIL]);
+          const children = getChildren(divContainer);
+          // initial assert
+          expect(instance.getEmails().length).toEqual(2);
+          const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+          });
+
+          // act - delete INVALID_EMAIL
+          children[1].querySelector('span').dispatchEvent(clickEvent);
+
+          // assert
+          const emails = instance.getEmails();
+          expect(emails.length).toEqual(1);
+          expect(emails[0]).toEqual(VALID_EMAIL);
+        });
+      });
       describe('parent component (email-inputs) should not be deleted', () => {
         it('when clicked on email node (but not on cross icon)', () => {
           // arrange
@@ -230,6 +251,12 @@ describe('EmailsInput', () => {
         instance.setEmails(emails);
         expect(instance.getEmails()).toEqual(emails);
       });
+      it('should clean up emailsList at the beginning', () => {
+        instance.setEmails([VALID_EMAIL]);
+        instance.setEmails([VALID_EMAIL, INVALID_EMAIL]);
+        instance.setEmails([VALID_EMAIL, INVALID_EMAIL, '3']);
+        expect(instance.getEmails().length).toEqual(3);
+      });
     });
     describe('setEmails', () => {
       it('expects array as an argument', () => {
@@ -256,20 +283,29 @@ describe('EmailsInput', () => {
       });
       it('should replace current emails with provided array', () => {
         instance.setEmails([VALID_EMAIL]);
-        const children = Array.from(divContainer.children);
+        const children = getChildren(divContainer);
         expect(children[0].innerHTML).toContain(VALID_EMAIL);
         checkNodeIsAnInput(children[1]);
       });
       it('should replace current emails with provided array (check several items)', () => {
         instance.setEmails([VALID_EMAIL, INVALID_EMAIL]);
-        const children = Array.from(divContainer.children);
+        const children = getChildren(divContainer);
         expect(children[0].innerHTML).toContain(VALID_EMAIL);
         expect(children[1].innerHTML).toContain(INVALID_EMAIL);
       });
       it('should keep an input node at the end', () => {
         instance.setEmails([VALID_EMAIL, INVALID_EMAIL]);
-        const children = Array.from(divContainer.children);
+        const children = getChildren(divContainer);
         checkNodeIsAnInput(children[2]);
+      });
+      it('should set nodes correctly after calling setEmails multiple times', () => {
+        instance.setEmails([VALID_EMAIL]);
+        instance.setEmails([VALID_EMAIL, INVALID_EMAIL]);
+        instance.setEmails([VALID_EMAIL, INVALID_EMAIL, '3']);
+        instance.setEmails([VALID_EMAIL, INVALID_EMAIL, '3', '4']);
+        const children = getChildren(divContainer);
+        expect(children.length).toEqual(4 + 1);
+        checkNodeIsAnInput(children[4]);
       });
     });
     describe('extra method isEmailValid', () => {
@@ -343,7 +379,9 @@ describe('EmailsInput', () => {
       // set click handler: getEmails, find valid ones, return count of valid
       const btnClickHandler = () => {
         const emails: string[] = instance.getEmails();
-        const validEmails = emails.filter(email => instance.isEmailValid(email));
+        const validEmails = emails.filter(email =>
+          instance.isEmailValid(email)
+        );
         // assert
         expect(validEmails.length).toEqual(2);
         done();
