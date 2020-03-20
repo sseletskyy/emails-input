@@ -61,33 +61,37 @@
         const countBtn = document.querySelector(
           'button.get-valid-emails-count'
         );
-        const countClickHandler = instance => () => {
-          const emails = instance.getEmails();
-          const validEmails = emails.filter(email =>
-            instance.isEmailValid(email)
-          );
-          alert(
-            'Number of valid emails in EmailsInput component: ' +
-              validEmails.length
-          );
-        };
+        function countClickHandler(instance) {
+          return function() {
+            const emails = instance.getEmails();
+            const validEmails = emails.filter(function(email) {
+              return instance.isEmailValid(email);
+            });
+            alert(
+              'Number of valid emails in EmailsInput component: ' +
+                validEmails.length
+            );
+          };
+        }
         countBtn.addEventListener('click', countClickHandler(emailInput));
 
         // use case Add Random email
         const addEmailBtn = document.querySelector('button.add-email');
-        const randomEmail = () => {
+        function randomEmail() {
           return [
             'random_',
             String(Math.floor(Math.random() * 999)),
             Math.random() > 0.5 ? '@' : '',
             'domain.com',
           ].join('');
-        };
-        const addEmailClickHandler = instance => () => {
-          const emails = instance.getEmails();
-          emails.push(randomEmail());
-          instance.setEmails(emails);
-        };
+        }
+        function addEmailClickHandler(instance) {
+          return function() {
+            const emails = instance.getEmails();
+            emails.push(randomEmail());
+            instance.setEmails(emails);
+          };
+        }
         addEmailBtn.addEventListener('click', addEmailClickHandler(emailInput));
       }
       document.addEventListener('DOMContentLoaded', main, false);
