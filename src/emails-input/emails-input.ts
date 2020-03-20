@@ -1,6 +1,6 @@
 import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
-import { validateEmail } from './utils';
+import { parsePastedText, validateEmail } from './utils';
 
 // custom events
 export const COMPLETE_INPUT = 'emails-input--complete-input-node';
@@ -13,7 +13,6 @@ export interface EmailsInputAPI {
   isEmailValid: (email: string) => boolean;
 }
 export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
-  let inputNode: HTMLInputElement;
   let emailList: string[];
   const _constructor = () => {
     emailList = [];
@@ -22,7 +21,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   };
 
   const _addInputNode = () => {
-    inputNode = containerNode.appendChild<HTMLInputElement>(InputNode.create());
+    containerNode.appendChild<HTMLInputElement>(InputNode.create());
   };
 
   const getEmails = (): string[] => {
@@ -98,6 +97,37 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     }
   };
 
+  // this method is not covered with tests cause js-dom does not support ClipboardEvent
+  // so the logic of parsing is moved to utils :: parsePastedText and covered with unit tests
+  const _onPaste: EventListener = (event: ClipboardEvent) => {
+    event.preventDefault();
+
+    // @ts-ignore
+    const text = (event.clipboardData || window.clipboardData).getData('text');
+    const parsed = parsePastedText(text);
+    const input = containerNode.lastChild as HTMLInputElement;
+    // if only one email in clipboard then put the value in input
+    if (parsed.length < 2) {
+      parsed[0] && (input.value = parsed[0]);
+      return;
+    }
+    // otherwise add them all immediately
+    // add new emails without re-rendering existing ones
+    parsed.forEach(item => {
+      const { div, email } = EmailNode.create(item);
+      input.before(div);
+      // add email to local list
+      emailList.push(email);
+    });
+
+    // const selection = window.getSelection();
+    // if (!selection.rangeCount) return false;
+    // selection.deleteFromDocument();
+    // selection.getRangeAt(0).insertNode(document.createTextNode(paste));
+    //
+    // event.preventDefault();
+  };
+
   const _setEventListeners = () => {
     // keyup -> _onKeyUp -> if (comma|Enter) -> _dispatchCompleteInput -> _convertInputToNode
     containerNode.addEventListener('keyup', _onKeyUp);
@@ -110,6 +140,9 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     // click -> _onClick -> check it is a delete element -> _dispatchDeleteEmailNode -> _deleteTargetEmail
     containerNode.addEventListener('click', _onClick);
     containerNode.addEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
+
+    // clipboard
+    containerNode.addEventListener('paste', _onPaste, true);
   };
 
   const _validateIncomingEmails = (emails: string[] | any) => {
@@ -149,14 +182,6 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     isEmailValid: validateEmail,
   };
 }
-
-// if (window && document) {
-//   document.addEventListener('DOMContentLoaded', () => {
-//     (function() {
-//       var EmailsInput = ClassEmailsInput;
-//     })();
-//   });
-// }
 
 // @ts-ignore
 window['EmailsInput'] = EmailsInput;
