@@ -2,8 +2,8 @@ import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
 
 // custom events
-export const INPUT_COMPLETED = 'emails-input-completed';
-export const EMAIL_DELETED = 'emails-email-deleted';
+export const COMPLETE_INPUT = 'emails-input--complete-input-node';
+export const DELETE_EMAIL_NODE = 'emails-input--delete-email-node';
 
 export interface EmailsInputAPI {
   getEmails: () => string[];
@@ -25,10 +25,18 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   };
 
   const _dispatchInputComplete = (target: HTMLInputElement) => {
-    const customEvent = new CustomEvent(INPUT_COMPLETED, {
+    const customEvent = new CustomEvent(COMPLETE_INPUT, {
       bubbles: true,
     });
     return target.dispatchEvent(customEvent);
+  };
+
+  const _dispatchEmailDeleted = (event: Event) => {
+    const targetSpan: HTMLSpanElement = event.target as HTMLSpanElement;
+    const customEvent = new CustomEvent(DELETE_EMAIL_NODE, {
+      bubbles: true,
+    });
+    return targetSpan.dispatchEvent(customEvent);
   };
 
   // this is a listener of the custom event INPUT_COMPLETED
@@ -54,24 +62,38 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   };
 
   const _onKeyUp: EventListener = (event: KeyboardEvent) => {
-    // console.log('EventListener :: ', event);
-    if (event.defaultPrevented) {
-      return;
-    }
-
     // keyCode and comparison with numbers are for backward compatibility with IE
     // noinspection JSDeprecatedSymbols
-	  const key = event.key || event.keyCode;
+    const key = event.key || event.keyCode;
     if (key === 'Enter' || key === 13 || key === ',' || key === 188) {
       _dispatchInputComplete(event.target as HTMLInputElement);
     }
   };
 
+  const _onFocusout: EventListener = (event: Event) => {
+    _dispatchInputComplete(event.target as HTMLInputElement);
+  };
+
+  const _onClick: EventListener = (event: MouseEvent) => {
+    // call custom event only if clicked on cross character in email-node
+    const target: HTMLElement = event.target as HTMLElement;
+    if (EmailNode.isDeleteButton(target)) {
+      _dispatchEmailDeleted(event);
+    }
+  };
+
   const _setEventListeners = () => {
+    // keyup -> _onKeyUp -> if (comma|Enter) -> _dispatchInputComplete -> _convertInputToNode
     containerNode.addEventListener('keyup', _onKeyUp);
-    containerNode.addEventListener(INPUT_COMPLETED, _convertInputToNode);
-    containerNode.addEventListener('focusout', _convertInputToNode);
-    containerNode.addEventListener(EMAIL_DELETED, _deleteTargetEmail);
+
+    // focusout -> _onFocusout -> _dispatchInputComplete -> _convertInputToNode
+    containerNode.addEventListener('focusout', _onFocusout);
+
+    containerNode.addEventListener(COMPLETE_INPUT, _convertInputToNode);
+
+    // click -> _onClick -> check it is a delete element -> _dispatchEmailDeleted -> _deleteTargetEmail
+    containerNode.addEventListener('click', _onClick);
+    containerNode.addEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
   };
 
   const _validateIncomingEmails = (emails: string[] | any) => {

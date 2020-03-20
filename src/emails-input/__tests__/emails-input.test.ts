@@ -1,4 +1,4 @@
-import { EmailsInput, EmailsInputAPI, INPUT_COMPLETED } from '../emails-input';
+import { EmailsInput, EmailsInputAPI, COMPLETE_INPUT } from '../emails-input';
 import { getChildren } from '../test-helper';
 
 const sandbox = () => {
@@ -44,14 +44,14 @@ describe('EmailsInput', () => {
             'input.email'
           );
           inputNode.value = VALID_EMAIL;
-          // simulate the final completion event initiated from [enter], [comma] or out of focus
-          const customEvent = new CustomEvent(INPUT_COMPLETED, {
+          // simulate the final completion event initiated from [enter]
+          const enterEvent = new KeyboardEvent('keyup', {
             bubbles: true,
+            key: 'Enter',
           });
 
           // act
-          inputNode.focus();
-          inputNode.dispatchEvent(customEvent);
+          inputNode.dispatchEvent(enterEvent);
 
           // assert
           children = getChildren(divContainer);
@@ -68,13 +68,14 @@ describe('EmailsInput', () => {
             'input.email'
           );
           inputNode.value = emailWithComma;
-          // simulate the final completion event initiated from [enter], [comma] or out of focus
-          const customEvent = new CustomEvent(INPUT_COMPLETED, {
+          // simulate the final completion event initiated from [comma]
+          const commaEvent = new KeyboardEvent('keyup', {
             bubbles: true,
+            key: ',',
           });
 
           // act
-          inputNode.dispatchEvent(customEvent);
+          inputNode.dispatchEvent(commaEvent);
 
           // assert
           children = getChildren(divContainer);
@@ -82,6 +83,27 @@ describe('EmailsInput', () => {
           // check no comma
           const textBeforeSpanTag = children[0].innerHTML.split('<')[0];
           expect(textBeforeSpanTag).toEqual(emailWithoutComma);
+        });
+        it('when onFocusout event happens', () => {
+          // arrange
+          let children = getChildren(divContainer);
+          expect(children.length).toEqual(1);
+          // find input node
+          const inputNode: HTMLInputElement = document.querySelector(
+            'input.email'
+          );
+          inputNode.value = INVALID_EMAIL;
+
+          // simulate the final completion event initiated from focusout
+          const focusoutEvent = new Event('focusout', {
+            bubbles: true,
+          });
+          // act
+          inputNode.dispatchEvent(focusoutEvent);
+          // assert
+          children = getChildren(divContainer);
+          expect(children.length).toEqual(2);
+          expect(children[0].innerHTML).toContain(INVALID_EMAIL);
         });
       });
       describe('email node should NOT be created with the custom event is dispatched', () => {
@@ -95,7 +117,7 @@ describe('EmailsInput', () => {
           );
           inputNode.value = '';
           // simulate the final completion event initiated from [enter], [comma] or out of focus
-          const customEvent = new CustomEvent(INPUT_COMPLETED, {
+          const customEvent = new CustomEvent(COMPLETE_INPUT, {
             bubbles: true,
           });
 
@@ -116,7 +138,7 @@ describe('EmailsInput', () => {
           );
           inputNode.value = ',';
           // simulate the final completion event initiated from [enter], [comma] or out of focus
-          const customEvent = new CustomEvent(INPUT_COMPLETED, {
+          const customEvent = new CustomEvent(COMPLETE_INPUT, {
             bubbles: true,
           });
 
@@ -137,7 +159,7 @@ describe('EmailsInput', () => {
           );
           inputNode.value = ',,,,';
           // simulate the final completion event initiated from [enter], [comma] or out of focus
-          const customEvent = new CustomEvent(INPUT_COMPLETED, {
+          const customEvent = new CustomEvent(COMPLETE_INPUT, {
             bubbles: true,
           });
 
@@ -168,6 +190,23 @@ describe('EmailsInput', () => {
           children = getChildren(divContainer);
           expect(children.length).toEqual(2);
           expect(children[0].innerHTML).toContain(VALID_EMAIL);
+        });
+      });
+      describe('parent component (email-inputs) should not be deleted', () => {
+        it('when clicked on email node (but not on cross icon)', () => {
+          // arrange
+          instance.setEmails([VALID_EMAIL, INVALID_EMAIL]);
+          let children = getChildren(divContainer);
+          expect(children.length).toEqual(3);
+          const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+          });
+
+          // act - click on email node
+          children[1].dispatchEvent(clickEvent);
+
+          // assert
+          expect(document.querySelector('#emails-input')).toBeTruthy();
         });
       });
     });

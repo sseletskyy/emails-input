@@ -1,5 +1,5 @@
 import { EmailNode } from '../email-node';
-import { EMAIL_DELETED } from '../emails-input';
+import { DELETE_EMAIL_NODE } from '../emails-input';
 const sandbox = () => {
   document.body.innerHTML = `
 <div id="sandbox"></div>
@@ -55,18 +55,18 @@ describe('EmailNode', () => {
     });
     describe('delete', () => {
       describe('when clicked on cross character', () => {
-        it('custom event should be dispatched', () => {
+        it('nothing should happen (parent component should be responsible for event handling)', () => {
           // arrange
           const div = EmailNode.create(VALID_EMAIL);
           const sandbox = document.getElementById('sandbox');
           sandbox.appendChild(div);
           const onDelete = jest.fn();
-          sandbox.addEventListener(EMAIL_DELETED, onDelete);
+          sandbox.addEventListener(DELETE_EMAIL_NODE, onDelete);
           // act
           // simulate click on the span element with a cross character
           div.querySelector('span').dispatchEvent(new MouseEvent('click'));
           // assert
-          expect(onDelete).toBeCalled();
+          expect(onDelete).not.toBeCalled();
         });
       });
     });

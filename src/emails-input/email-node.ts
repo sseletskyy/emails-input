@@ -1,12 +1,12 @@
 import { validateEmail } from './utils';
-import { EMAIL_DELETED } from './emails-input';
 
 interface EmailNodeAPI {
   create: (email: string) => HTMLDivElement;
+  isDeleteButton: (target: HTMLElement) => boolean;
 }
 
 const EmailNodeFn = (): EmailNodeAPI => {
-  const _validateString = (email: string | any): void => {
+  const _validateString = (email: any): void => {
     if (typeof email !== 'string') {
       throw new Error(
         'EmailNode : create method expects a string as an argument'
@@ -14,17 +14,11 @@ const EmailNodeFn = (): EmailNodeAPI => {
     }
   };
 
-  const _dispatchEmailDeleted = (event: Event) => {
-    const targetSpan: HTMLSpanElement = event.target as HTMLSpanElement;
-    const customEvent = new CustomEvent(EMAIL_DELETED, {
-      bubbles: true,
-    });
-    return targetSpan.dispatchEvent(customEvent);
-  };
-
-  const _setEventListeners = (node: HTMLElement) => {
-    node.addEventListener('click', _dispatchEmailDeleted);
-  };
+  /**
+   * generates a new html element
+   * parent component should be responsible for appending to DOM
+   * and adding event listeners
+   */
   const create = (email: string): HTMLDivElement => {
     // TODO optimise creation with a template to be cloned
     _validateString(email);
@@ -42,13 +36,21 @@ const EmailNodeFn = (): EmailNodeAPI => {
     const span = document.createElement('span');
     span.innerHTML = '&#10005';
     span.className = 'delete';
-    _setEventListeners(span);
     div.appendChild(span);
     return div;
   };
 
+  /**
+   * helps to check if clicked element is indeed a delete btn (<span> X </span>)
+   * is used in the parent component, cause parent is responsible for handling events
+   */
+  const isDeleteButton = (target: HTMLElement): boolean =>
+    target.tagName.toLowerCase() === 'span' &&
+    target.classList.contains('delete');
+
   return {
     create,
+    isDeleteButton,
   };
 };
 
