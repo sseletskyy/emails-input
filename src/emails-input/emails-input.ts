@@ -1,5 +1,6 @@
 import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
+import {validateEmail} from "./utils";
 
 // custom events
 export const COMPLETE_INPUT = 'emails-input--complete-input-node';
@@ -8,10 +9,14 @@ export const DELETE_EMAIL_NODE = 'emails-input--delete-email-node';
 export interface EmailsInputAPI {
   getEmails: () => string[];
   setEmails: (emails: string[]) => void;
+  // extra method
+  isEmailValid: (email: string) => boolean;
 }
 export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   let inputNode: HTMLInputElement;
+  let emailList: string[];
   const _constructor = () => {
+    emailList = [];
     _addInputNode();
     _setEventListeners();
   };
@@ -21,17 +26,18 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   };
 
   const getEmails = (): string[] => {
-    return [];
+    // return a cloned array, no way to impact on the list outside
+    return Array.from(emailList);
   };
 
-  const _dispatchInputComplete = (target: HTMLInputElement) => {
+  const _dispatchCompleteInput = (target: HTMLInputElement) => {
     const customEvent = new CustomEvent(COMPLETE_INPUT, {
       bubbles: true,
     });
     return target.dispatchEvent(customEvent);
   };
 
-  const _dispatchEmailDeleted = (event: Event) => {
+  const _dispatchDeleteEmailNode = (event: Event) => {
     const targetSpan: HTMLSpanElement = event.target as HTMLSpanElement;
     const customEvent = new CustomEvent(DELETE_EMAIL_NODE, {
       bubbles: true,
@@ -39,7 +45,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     return targetSpan.dispatchEvent(customEvent);
   };
 
-  // this is a listener of the custom event INPUT_COMPLETED
+  // this is a listener of the custom event COMPLETE_INPUT
   const _convertInputToNode: EventListener = (event: CustomEvent) => {
     // console.log('CustomEventListener :: ', event);
     const target = event.target as HTMLInputElement;
@@ -50,8 +56,10 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
       return;
     }
     // create new email node and add it before input
-    const newEmailNode = EmailNode.create(email);
+    const { div: newEmailNode } = EmailNode.create(email);
     target.before(newEmailNode);
+    // add email to local list
+    emailList.push(email);
     // clean un value in input
     target.value = '';
   };
@@ -59,6 +67,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   const _deleteTargetEmail: EventListener = (event: CustomEvent) => {
     const target = event.target as HTMLDivElement;
     target.parentElement.remove();
+    // TODO remove email
   };
 
   const _onKeyUp: EventListener = (event: KeyboardEvent) => {
@@ -66,32 +75,32 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     // noinspection JSDeprecatedSymbols
     const key = event.key || event.keyCode;
     if (key === 'Enter' || key === 13 || key === ',' || key === 188) {
-      _dispatchInputComplete(event.target as HTMLInputElement);
+      _dispatchCompleteInput(event.target as HTMLInputElement);
     }
   };
 
   const _onFocusout: EventListener = (event: Event) => {
-    _dispatchInputComplete(event.target as HTMLInputElement);
+    _dispatchCompleteInput(event.target as HTMLInputElement);
   };
 
   const _onClick: EventListener = (event: MouseEvent) => {
     // call custom event only if clicked on cross character in email-node
     const target: HTMLElement = event.target as HTMLElement;
     if (EmailNode.isDeleteButton(target)) {
-      _dispatchEmailDeleted(event);
+      _dispatchDeleteEmailNode(event);
     }
   };
 
   const _setEventListeners = () => {
-    // keyup -> _onKeyUp -> if (comma|Enter) -> _dispatchInputComplete -> _convertInputToNode
+    // keyup -> _onKeyUp -> if (comma|Enter) -> _dispatchCompleteInput -> _convertInputToNode
     containerNode.addEventListener('keyup', _onKeyUp);
 
-    // focusout -> _onFocusout -> _dispatchInputComplete -> _convertInputToNode
+    // focusout -> _onFocusout -> _dispatchCompleteInput -> _convertInputToNode
     containerNode.addEventListener('focusout', _onFocusout);
 
     containerNode.addEventListener(COMPLETE_INPUT, _convertInputToNode);
 
-    // click -> _onClick -> check it is a delete element -> _dispatchEmailDeleted -> _deleteTargetEmail
+    // click -> _onClick -> check it is a delete element -> _dispatchDeleteEmailNode -> _deleteTargetEmail
     containerNode.addEventListener('click', _onClick);
     containerNode.addEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
   };
@@ -114,8 +123,10 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     _validateIncomingEmails(emails);
     _clearChildren();
     emails.forEach(email => {
-      const item = EmailNode.create(email);
+      const { div: item, email: finalEmailString } = EmailNode.create(email);
       containerNode.appendChild<HTMLDivElement>(item);
+      // add the same email string (as it is in email node) to emailList
+      emailList.push(finalEmailString);
     });
     containerNode.appendChild<HTMLInputElement>(InputNode.create());
   };
@@ -125,6 +136,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   return {
     getEmails,
     setEmails,
+    isEmailValid: validateEmail,
   };
 }
 

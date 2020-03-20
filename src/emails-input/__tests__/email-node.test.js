@@ -28,8 +28,8 @@ describe('EmailNode', () => {
         );
       });
       describe('when email is valid', () => {
-        it('should return a div element with respective css class', () => {
-          const div = EmailNode.create(VALID_EMAIL);
+        it('should return an object with a key [div] - div element with respective css class', () => {
+          const { div } = EmailNode.create(VALID_EMAIL);
           const classList = Array.from(div.classList);
           expect(classList).toEqual(
             expect.arrayContaining(['email', 'email--state-valid'])
@@ -38,7 +38,7 @@ describe('EmailNode', () => {
       });
       describe('when email is INVALID', () => {
         it('should return a div element with respective css class', () => {
-          const div = EmailNode.create(INVALID_EMAIL);
+          const { div } = EmailNode.create(INVALID_EMAIL);
           const classList = Array.from(div.classList);
           expect(classList).toEqual(
             expect.arrayContaining(['email', 'email--state-invalid'])
@@ -47,9 +47,13 @@ describe('EmailNode', () => {
       });
       describe('when email ends with comma', () => {
         it('should remove comma in final email text', () => {
-          const div = EmailNode.create(EMAIL_ENDING_WITH_COMMA);
+          const { div } = EmailNode.create(EMAIL_ENDING_WITH_COMMA);
           const textBeforeSpanTag = div.innerHTML.split('<')[0];
           expect(textBeforeSpanTag).toEqual(EMAIL_ENDING_WITH_NO_COMMA);
+        });
+        it('should return object with key email with removed comma in final email text', () => {
+          const { email } = EmailNode.create(EMAIL_ENDING_WITH_COMMA);
+          expect(email).toEqual(EMAIL_ENDING_WITH_NO_COMMA);
         });
       });
     });
@@ -57,7 +61,7 @@ describe('EmailNode', () => {
       describe('when clicked on cross character', () => {
         it('nothing should happen (parent component should be responsible for event handling)', () => {
           // arrange
-          const div = EmailNode.create(VALID_EMAIL);
+          const { div } = EmailNode.create(VALID_EMAIL);
           const sandbox = document.getElementById('sandbox');
           sandbox.appendChild(div);
           const onDelete = jest.fn();

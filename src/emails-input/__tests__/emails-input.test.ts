@@ -1,9 +1,10 @@
 import { EmailsInput, EmailsInputAPI, COMPLETE_INPUT } from '../emails-input';
 import { getChildren } from '../test-helper';
 
-const sandbox = () => {
+const sandbox = (additionalTags: string = '') => {
   document.body.innerHTML = `
 <div id="emails-input"></div>
+${additionalTags}
 `;
 };
 const VALID_EMAIL = 'mike@miro.com';
@@ -224,6 +225,11 @@ describe('EmailsInput', () => {
         expect(instance.getEmails).toBeTruthy();
         expect(instance.getEmails()).toEqual([]);
       });
+      it('should return non empty array if emails exist', () => {
+        const emails: string[] = ['A', 'B', 'C'];
+        instance.setEmails(emails);
+        expect(instance.getEmails()).toEqual(emails);
+      });
     });
     describe('setEmails', () => {
       it('expects array as an argument', () => {
@@ -265,6 +271,90 @@ describe('EmailsInput', () => {
         const children = Array.from(divContainer.children);
         checkNodeIsAnInput(children[2]);
       });
+    });
+    describe('extra method isEmailValid', () => {
+      it('should return true for provided valid email', () => {
+        expect(instance.isEmailValid('michael@miro.com')).toEqual(true);
+      });
+      it('should return false for provided invalid email', () => {
+        expect(instance.isEmailValid('invalid_one')).toEqual(false);
+      });
+    });
+  });
+  describe('Use Case: Add Email - using external btn to add a new email', () => {
+    /**
+     * according to API requirements external button can add an new email only with replacing all others
+     * in three steps
+     * 1) getEmails as an array
+     * 2) push new email to the array
+     * 3) setEmails with an updated array
+     */
+    let instance: EmailsInputAPI;
+    let divContainer: HTMLDivElement;
+    let addBtn: HTMLElement;
+    beforeEach(() => {
+      sandbox(`<button id="add-email" />`);
+      divContainer = document.querySelector('#emails-input');
+      instance = EmailsInput(divContainer);
+      addBtn = document.getElementById('add-email');
+    });
+    it('when click on external btn should re-render EmailInput with the same list of emails plus one new', () => {
+      // arrange
+      const initialEmails = ['A', 'B', 'C'];
+      const newEmail = 'random@email.com';
+      instance.setEmails(initialEmails);
+      // set click handler: getEmails, update array, setEmails
+      const addBtnClickHandler = () => {
+        const emails: string[] = instance.getEmails();
+        emails.push(newEmail);
+        instance.setEmails(emails);
+      };
+      // initial assert
+      let children = getChildren(divContainer);
+      expect(children.length).toEqual(initialEmails.length + 1); // plus input
+      // attach handler
+      addBtn.addEventListener('click', addBtnClickHandler);
+      // act
+      addBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      // assert
+      children = getChildren(divContainer);
+      expect(children.length).toEqual(initialEmails.length + 1 + 1); // plus input + added email
+    });
+  });
+  describe('Use Case: Get valid emails count', () => {
+    let instance: EmailsInputAPI;
+    let divContainer: HTMLDivElement;
+    let countValidEmailsBtn: HTMLElement;
+    beforeEach(() => {
+      sandbox(`<button id="count-valid-emails-btn" />`);
+      divContainer = document.querySelector('#emails-input');
+      instance = EmailsInput(divContainer);
+      countValidEmailsBtn = document.getElementById('count-valid-emails-btn');
+    });
+    it('when click on external btn should get list of all emails, validate each, and return count of valid', done => {
+      // arrange
+      const initialEmails = [
+        'valid@email.com',
+        'invalid',
+        'also@valid.email',
+        'nope',
+      ];
+      instance.setEmails(initialEmails);
+      // set click handler: getEmails, find valid ones, return count of valid
+      const btnClickHandler = () => {
+        const emails: string[] = instance.getEmails();
+        const validEmails = emails.filter(email => instance.isEmailValid(email));
+        // assert
+        expect(validEmails.length).toEqual(2);
+        done();
+      };
+      // attach handler
+      countValidEmailsBtn.addEventListener('click', btnClickHandler);
+      // act
+      countValidEmailsBtn.dispatchEvent(
+        new MouseEvent('click', { bubbles: true })
+      );
+      // assert - check it in btnClickHandler
     });
   });
 });

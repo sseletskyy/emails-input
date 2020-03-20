@@ -1,7 +1,11 @@
 import { validateEmail } from './utils';
 
+interface CreateFnReturnType {
+  div: HTMLDivElement;
+  email: string;
+}
 interface EmailNodeAPI {
-  create: (email: string) => HTMLDivElement;
+  create: (email: string) => CreateFnReturnType;
   isDeleteButton: (target: HTMLElement) => boolean;
 }
 
@@ -18,8 +22,10 @@ const EmailNodeFn = (): EmailNodeAPI => {
    * generates a new html element
    * parent component should be responsible for appending to DOM
    * and adding event listeners
+   * returns an object with keys div: HTMLDivElement, email: string
+   * email can be used in parent component to update the email list
    */
-  const create = (email: string): HTMLDivElement => {
+  const create = (email: string): CreateFnReturnType => {
     // TODO optimise creation with a template to be cloned
     _validateString(email);
     // remove trailing comma
@@ -37,7 +43,7 @@ const EmailNodeFn = (): EmailNodeAPI => {
     span.innerHTML = '&#10005';
     span.className = 'delete';
     div.appendChild(span);
-    return div;
+    return { div, email: noEndingComma };
   };
 
   /**
