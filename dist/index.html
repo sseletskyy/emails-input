@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Email Input</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+  <link rel="shortcut icon" href="favicon.ico"></head>
+  <body>
+    <div class="container">
+      <div class="emails-input-panel">
+        <div class="header">
+          <div class="header-container">
+            <div class="title">
+              Share <strong>Board Name</strong> with others
+            </div>
+            <div class="emails-input">
+              <div class="email email--state-valid">
+                john@miro.com<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-invalid">
+                michael@miro<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-valid">
+                john@miro.com<span class="delete">&#10005;</span>
+              </div>
+              <div class="email email--state-invalid">
+                michael@miro<span class="delete">&#10005;</span>
+              </div>
+              <input
+                class="email email--state-input"
+                placeholder="add more people..."
+                type="text"
+              />
+            </div>
+            <br />
+            <div id="emails-input" class="emails-input"></div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="footer-container">
+            <button class="button add-email">Add Email</button>
+            <button class="button get-valid-emails-count">
+              Get Emails Counts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="emails-input.bundle.js"></script>
+    <script type="application/javascript">
+      function main() {
+        const emailInput = EmailsInput(document.querySelector('#emails-input'));
+        emailInput.setEmails(['mike@miro.com', 'incorrect']);
+
+        // use case Get Valid Emails Count
+        const countBtn = document.querySelector(
+          'button.get-valid-emails-count'
+        );
+        const countClickHandler = instance => () => {
+          const emails = instance.getEmails();
+          const validEmails = emails.filter(email =>
+            instance.isEmailValid(email)
+          );
+          alert(
+            'Number of valid emails in EmailsInput component: ' +
+              validEmails.length
+          );
+        };
+        countBtn.addEventListener('click', countClickHandler(emailInput));
+
+        // use case Add Random email
+        const addEmailBtn = document.querySelector('button.add-email');
+        const randomEmail = () => {
+          return [
+            'random_',
+            String(Math.floor(Math.random() * 999)),
+            Math.random() > 0.5 ? '@' : '',
+            'domain.com',
+          ].join('');
+        };
+        const addEmailClickHandler = instance => () => {
+          const emails = instance.getEmails();
+          emails.push(randomEmail());
+          instance.setEmails(emails);
+        };
+        addEmailBtn.addEventListener('click', addEmailClickHandler(emailInput));
+      }
+      document.addEventListener('DOMContentLoaded', main, false);
+    </script>
+  <script type="text/javascript" src="index.bundle.js"></script><script type="text/javascript" src="emails-input.bundle.js"></script></body>
+</html>
