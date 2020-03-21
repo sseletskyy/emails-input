@@ -58,7 +58,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     }
     // create new email node and add it before input
     const { div: newEmailNode } = EmailNode.create(email);
-    target.before(newEmailNode);
+    target.parentNode.insertBefore(newEmailNode, target);
     // add email to local list
     emailList.push(email);
     // clean un value in input
@@ -117,7 +117,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     // add new emails without re-rendering existing ones
     parsed.forEach(item => {
       const { div, email } = EmailNode.create(item);
-      input.before(div);
+      containerNode.insertBefore(div, input);
       // add email to local list
       emailList.push(email);
     });

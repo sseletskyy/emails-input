@@ -501,13 +501,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _style_less__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./style.less */ "./src/style.less");
 /* harmony import */ var _style_less__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_style_less__WEBPACK_IMPORTED_MODULE_0__);
 
-function component() {
-    var element = document.createElement('div');
-    // Lodash, currently included via a script, is required for this line to work
-    element.innerHTML = ['Hello', 'webpack', 'Typescript'].join(' ');
-    return element;
-}
-document.body.appendChild(component());
 
 
 /***/ }),

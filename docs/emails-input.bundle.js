@@ -213,7 +213,7 @@ function EmailsInput(containerNode) {
         }
         // create new email node and add it before input
         var newEmailNode = _email_node__WEBPACK_IMPORTED_MODULE_1__["EmailNode"].create(email).div;
-        target.before(newEmailNode);
+        target.parentNode.insertBefore(newEmailNode, target);
         // add email to local list
         emailList.push(email);
         // clean un value in input
@@ -266,7 +266,7 @@ function EmailsInput(containerNode) {
         // add new emails without re-rendering existing ones
         parsed.forEach(function (item) {
             var _a = _email_node__WEBPACK_IMPORTED_MODULE_1__["EmailNode"].create(item), div = _a.div, email = _a.email;
-            input.before(div);
+            containerNode.insertBefore(div, input);
             // add email to local list
             emailList.push(email);
         });
