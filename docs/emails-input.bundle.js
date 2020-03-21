@@ -647,8 +647,8 @@ function EmailsInput(containerNode) {
         if (emailIndex >= 0) {
             emailList.splice(emailIndex, 1);
         }
-        // remove email node
-        target.parentElement.remove();
+        // remove email node; IE11 does not support .remove method; so using removeChild instead
+        emailNode.parentElement.removeChild(emailNode);
     };
     var _onKeyUp = function (event) {
         // keyCode and comparison with numbers are for backward compatibility with IE
