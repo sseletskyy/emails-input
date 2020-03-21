@@ -162,12 +162,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "COMPLETE_INPUT", function() { return COMPLETE_INPUT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DELETE_EMAIL_NODE", function() { return DELETE_EMAIL_NODE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EmailsInput", function() { return EmailsInput; });
-/* harmony import */ var _email_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./email-node */ "./src/emails-input/email-node.ts");
-/* harmony import */ var _input_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./input-node */ "./src/emails-input/input-node.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils */ "./src/emails-input/utils.ts");
+/* harmony import */ var _polyfills__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./polyfills */ "./src/emails-input/polyfills.ts");
+/* harmony import */ var _email_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./email-node */ "./src/emails-input/email-node.ts");
+/* harmony import */ var _input_node__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./input-node */ "./src/emails-input/input-node.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils */ "./src/emails-input/utils.ts");
 
 
 
+
+Object(_polyfills__WEBPACK_IMPORTED_MODULE_0__["default"])(); // support IE11
 // custom events
 var COMPLETE_INPUT = 'emails-input--complete-input-node';
 var DELETE_EMAIL_NODE = 'emails-input--delete-email-node';
@@ -179,7 +182,7 @@ function EmailsInput(containerNode) {
         _setEventListeners();
     };
     var _addInputNode = function () {
-        containerNode.appendChild(_input_node__WEBPACK_IMPORTED_MODULE_1__["InputNode"].create());
+        containerNode.appendChild(_input_node__WEBPACK_IMPORTED_MODULE_2__["InputNode"].create());
     };
     var getEmails = function () {
         // return a cloned array, no way to impact on the list outside
@@ -209,7 +212,7 @@ function EmailsInput(containerNode) {
             return;
         }
         // create new email node and add it before input
-        var newEmailNode = _email_node__WEBPACK_IMPORTED_MODULE_0__["EmailNode"].create(email).div;
+        var newEmailNode = _email_node__WEBPACK_IMPORTED_MODULE_1__["EmailNode"].create(email).div;
         target.before(newEmailNode);
         // add email to local list
         emailList.push(email);
@@ -242,7 +245,7 @@ function EmailsInput(containerNode) {
     var _onClick = function (event) {
         // call custom event only if clicked on cross character in email-node
         var target = event.target;
-        if (_email_node__WEBPACK_IMPORTED_MODULE_0__["EmailNode"].isDeleteButton(target)) {
+        if (_email_node__WEBPACK_IMPORTED_MODULE_1__["EmailNode"].isDeleteButton(target)) {
             _dispatchDeleteEmailNode(event);
         }
     };
@@ -252,7 +255,7 @@ function EmailsInput(containerNode) {
         event.preventDefault();
         // @ts-ignore
         var text = (event.clipboardData || window.clipboardData).getData('text');
-        var parsed = Object(_utils__WEBPACK_IMPORTED_MODULE_2__["parsePastedText"])(text);
+        var parsed = Object(_utils__WEBPACK_IMPORTED_MODULE_3__["parsePastedText"])(text);
         var input = containerNode.lastChild;
         // if only one email in clipboard then put the value in input
         if (parsed.length < 2) {
@@ -262,7 +265,7 @@ function EmailsInput(containerNode) {
         // otherwise add them all immediately
         // add new emails without re-rendering existing ones
         parsed.forEach(function (item) {
-            var _a = _email_node__WEBPACK_IMPORTED_MODULE_0__["EmailNode"].create(item), div = _a.div, email = _a.email;
+            var _a = _email_node__WEBPACK_IMPORTED_MODULE_1__["EmailNode"].create(item), div = _a.div, email = _a.email;
             input.before(div);
             // add email to local list
             emailList.push(email);
@@ -288,7 +291,7 @@ function EmailsInput(containerNode) {
     };
     var _validateIncomingEmails = function (emails) {
         if (!Array.isArray(emails) ||
-            emails.find(function (email) { return typeof email !== 'string'; })) {
+            emails.filter(function (email) { return typeof email !== 'string'; })[0]) {
             throw new Error('EmailsInput : setEmails method expects an array of strings as an argument');
         }
     };
@@ -300,13 +303,13 @@ function EmailsInput(containerNode) {
         _clearChildren();
         emailList = [];
         emails.forEach(function (email) {
-            var _a = _email_node__WEBPACK_IMPORTED_MODULE_0__["EmailNode"].create(email), item = _a.div, finalEmailString = _a.email;
+            var _a = _email_node__WEBPACK_IMPORTED_MODULE_1__["EmailNode"].create(email), item = _a.div, finalEmailString = _a.email;
             containerNode.appendChild(item);
             // add the same email string (as it is in email node) to emailList
             emailList.push(finalEmailString);
         });
         containerNode
-            .appendChild(_input_node__WEBPACK_IMPORTED_MODULE_1__["InputNode"].create())
+            .appendChild(_input_node__WEBPACK_IMPORTED_MODULE_2__["InputNode"].create())
             .scrollIntoView();
     };
     // call constructor before returning API
@@ -314,7 +317,7 @@ function EmailsInput(containerNode) {
     return {
         getEmails: getEmails,
         setEmails: setEmails,
-        isEmailValid: _utils__WEBPACK_IMPORTED_MODULE_2__["validateEmail"],
+        isEmailValid: _utils__WEBPACK_IMPORTED_MODULE_3__["validateEmail"],
     };
 }
 // @ts-ignore
@@ -346,6 +349,33 @@ var InputNodeFn = function () {
     };
 };
 var InputNode = InputNodeFn();
+
+
+/***/ }),
+
+/***/ "./src/emails-input/polyfills.ts":
+/*!***************************************!*\
+  !*** ./src/emails-input/polyfills.ts ***!
+  \***************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return main; });
+function main() {
+    if (typeof window.CustomEvent === 'function')
+        return false;
+    function CustomEvent(event, params) {
+        params = params || { bubbles: false, cancelable: false, detail: undefined };
+        var evt = document.createEvent('CustomEvent');
+        evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+        return evt;
+    }
+    CustomEvent.prototype = window.Event.prototype;
+    // @ts-ignore
+    window.CustomEvent = CustomEvent;
+}
 
 
 /***/ }),

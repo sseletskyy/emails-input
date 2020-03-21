@@ -1,7 +1,9 @@
+import polyfills from './polyfills';
 import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
 import { parsePastedText, validateEmail } from './utils';
 
+polyfills(); // support IE11
 // custom events
 export const COMPLETE_INPUT = 'emails-input--complete-input-node';
 export const DELETE_EMAIL_NODE = 'emails-input--delete-email-node';
@@ -148,7 +150,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   const _validateIncomingEmails = (emails: string[] | any) => {
     if (
       !Array.isArray(emails) ||
-      emails.find(email => typeof email !== 'string')
+      emails.filter(email => typeof email !== 'string')[0]
     ) {
       throw new Error(
         'EmailsInput : setEmails method expects an array of strings as an argument'
