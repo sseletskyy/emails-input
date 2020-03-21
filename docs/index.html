@@ -54,8 +54,16 @@
     <script src="emails-input.bundle.js"></script>
     <script type="application/javascript">
       function main() {
-        const emailInput = EmailsInput(document.querySelector('#emails-input'));
-        emailInput.setEmails(['mike@miro.com', 'incorrect']);
+        const config = {
+          defaultEmails: ['mike@miro.com', 'incorrect', '123'],
+          maxHeight: '500px',
+          minHeight: '50px',
+        };
+        const emailInput = EmailsInput(
+          document.querySelector('#emails-input'),
+          config
+        );
+        // emailInput.setEmails();
 
         // use case Get Valid Emails Count
         const countBtn = document.querySelector(

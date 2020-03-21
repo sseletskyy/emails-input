@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Email Input</title>
+    <title>Email Input Experiment</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link
@@ -18,27 +18,9 @@
             <div class="title">
               Share <strong>Board Name</strong> with others
             </div>
-            <div class="emails-input">
-              <div class="email email--state-valid">
-                john@miro.com<span class="delete">&#10005;</span>
-              </div>
-              <div class="email email--state-invalid">
-                michael@miro<span class="delete">&#10005;</span>
-              </div>
-              <div class="email email--state-valid">
-                john@miro.com<span class="delete">&#10005;</span>
-              </div>
-              <div class="email email--state-invalid">
-                michael@miro<span class="delete">&#10005;</span>
-              </div>
-              <input
-                class="email email--state-input"
-                placeholder="add more people..."
-                type="text"
-              />
-            </div>
             <br />
-            <div id="emails-input"></div>
+            <div class="emails-input-1"></div>
+            <div class="emails-input-2"></div>
           </div>
         </div>
         <div class="footer">
@@ -54,16 +36,9 @@
     <script src="emails-input.bundle.js"></script>
     <script type="application/javascript">
       function main() {
-        const config = {
-          defaultEmails: ['mike@miro.com', 'incorrect', '123'],
-          maxHeight: '500px',
-          minHeight: '50px',
-        };
-        const emailInput = EmailsInput(
-          document.querySelector('#emails-input'),
-          config
-        );
-        // emailInput.setEmails();
+        const emailInput = EmailsInput(document.querySelector('.emails-input-1'));
+        EmailsInput(document.querySelector('.emails-input-2'));
+        emailInput.setEmails(['mike@miro.com', 'incorrect']);
 
         // use case Get Valid Emails Count
         const countBtn = document.querySelector(

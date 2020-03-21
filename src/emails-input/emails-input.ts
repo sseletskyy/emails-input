@@ -15,14 +15,50 @@ export interface EmailsInputAPI {
   // extra method
   isEmailValid: (email: string) => boolean;
 }
-export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
+
+export interface Config {
+  defaultEmails: string[];
+  maxHeight: string;
+  minHeight: string;
+}
+
+export function EmailsInput(
+  containerNode: HTMLElement,
+  config: Partial<Config> = {}
+): EmailsInputAPI {
   let emailList: string[];
-  const _constructor = () => {
-    emailList = [];
-    // set style to container
-    containerNode.classList.add(styles.emailsInput);
-    _addInputNode();
-    _setEventListeners();
+
+  const _throwError = (message: string) => {
+    throw new Error(`EmailsInput : ${message}`);
+  };
+
+  const _validateFirstArgument = (node: any) => {
+    if (!(node instanceof HTMLElement)) {
+      _throwError('constructor expects HTMLElement as the first argument');
+    }
+  };
+  const _validateSecondArgument = (config: Partial<Config> | any) => {
+    if (!(config instanceof Object)) {
+      _throwError('constructor expects Object as the second argument');
+    }
+    const { defaultEmails, maxHeight, minHeight } = config;
+    // throw if 1) not an array (skip if undefined)  2) or array is not empty and at least one element is not a string
+    if (
+      (defaultEmails !== undefined && !Array.isArray(defaultEmails)) ||
+      (Array.isArray(defaultEmails) &&
+        defaultEmails?.length > 0 &&
+        defaultEmails?.filter((item: any) => typeof item !== 'string').length >
+          0)
+    ) {
+      _throwError('config.defaultEmails should be a type of string[]');
+    }
+
+    if (maxHeight !== undefined && typeof maxHeight !== 'string') {
+      _throwError('config.maxHeight should be a type of string');
+    }
+    if (minHeight !== undefined && typeof minHeight !== 'string') {
+      _throwError('config.minHeight should be a type of string');
+    }
   };
 
   const _addInputNode = () => {
@@ -155,8 +191,8 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
       !Array.isArray(emails) ||
       emails.filter(email => typeof email !== 'string')[0]
     ) {
-      throw new Error(
-        'EmailsInput : setEmails method expects an array of strings as an argument'
+      _throwError(
+        'setEmails method expects an array of strings as an argument'
       );
     }
   };
@@ -177,6 +213,29 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     containerNode
       .appendChild<HTMLInputElement>(InputNode.create())
       .scrollIntoView();
+  };
+
+  const _applyConfig = (config: Partial<Config>) => {
+    const { defaultEmails, maxHeight, minHeight } = config;
+    if (defaultEmails) {
+      setEmails(defaultEmails);
+    }
+    if (maxHeight) {
+      containerNode.style.maxHeight = maxHeight;
+    }
+    if (minHeight) {
+      containerNode.style.minHeight = minHeight;
+    }
+  };
+  const _constructor = () => {
+    emailList = [];
+    _validateFirstArgument(containerNode);
+    _validateSecondArgument(config);
+    _addInputNode();
+    _applyConfig(config);
+    // set style to container
+    containerNode.classList.add(styles.emailsInput);
+    _setEventListeners();
   };
 
   // call constructor before returning API

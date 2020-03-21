@@ -24,6 +24,98 @@ describe('EmailsInput', () => {
   it('should be available', () => {
     expect(EmailsInput).toBeTruthy();
   });
+  describe('arguments', () => {
+    describe('first argument', () => {
+      it('should be an instance of HTMLElement; throw error otherwise', () => {
+        // @ts-ignore
+        expect(() => EmailsInput('notAnHTMLElement')).toThrowError(
+          'EmailsInput : constructor expects HTMLElement as the first argument'
+        );
+      });
+    });
+    describe('second argument', () => {
+      let instance: EmailsInputAPI;
+      let divContainer: HTMLDivElement;
+      beforeEach(() => {
+        divContainer = document.querySelector('#emails-input');
+      });
+
+      it('is optional', () => {
+        expect(() => {
+          EmailsInput(divContainer);
+        }).not.toThrow();
+      });
+      it('should be an object', () => {
+        expect(() => {
+          EmailsInput(divContainer, {});
+        }).not.toThrow();
+      });
+      it('should throw Error if it is NOT an object', () => {
+        expect(() => {
+          // @ts-ignore
+          EmailsInput(divContainer, 'string');
+        }).toThrow(
+          'EmailsInput : constructor expects Object as the second argument'
+        );
+      });
+      describe('should support param [defaultEmail]', () => {
+        it('should throw error if it is not an array of string (empty array is ok)', () => {
+          expect(() => {
+            // @ts-ignore
+            EmailsInput(divContainer, { defaultEmails: null });
+          }).toThrow(
+            'EmailsInput : config.defaultEmails should be a type of string[]'
+          );
+          expect(() => {
+            // @ts-ignore
+            EmailsInput(divContainer, { defaultEmails: [1, 2, 3] });
+          }).toThrow(
+            'EmailsInput : config.defaultEmails should be a type of string[]'
+          );
+          expect(() => {
+            // @ts-ignore
+            EmailsInput(divContainer, { defaultEmails: [] });
+          }).not.toThrow();
+        });
+        it('should add email nodes according to values', () => {
+          const defaultEmails = ['1', '2', '3'];
+          const instance = EmailsInput(divContainer, { defaultEmails });
+          expect(instance.getEmails()).toEqual(defaultEmails);
+          expect(getChildren(divContainer).length).toEqual(4);
+        });
+      });
+      describe('should support param [maxHeight]', () => {
+        it('should be string', () => {
+          expect(() => {
+            // @ts-ignore
+            EmailsInput(divContainer, { maxHeight: null });
+          }).toThrow(
+            'EmailsInput : config.maxHeight should be a type of string'
+          );
+        });
+        it('should set respective internal style to the root div', () => {
+          const maxHeight = '500px';
+          const instance = EmailsInput(divContainer, { maxHeight });
+          expect(divContainer.style.maxHeight).toEqual(maxHeight);
+        });
+      });
+      describe('should support param [minHeight]', () => {
+        it('should be string', () => {
+          expect(() => {
+            // @ts-ignore
+            EmailsInput(divContainer, { minHeight: null });
+          }).toThrow(
+            'EmailsInput : config.minHeight should be a type of string'
+          );
+        });
+        it('should set respective internal style to the root div', () => {
+          const minHeight = '100px';
+          EmailsInput(divContainer, { minHeight });
+          expect(divContainer.style.minHeight).toEqual(minHeight);
+        });
+      });
+    });
+  });
   describe('instance should provide the following behavior', () => {
     let instance: EmailsInputAPI;
     let divContainer: HTMLDivElement;
