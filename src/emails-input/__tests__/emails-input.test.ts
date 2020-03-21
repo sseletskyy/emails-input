@@ -1,5 +1,6 @@
 import { EmailsInput, EmailsInputAPI, COMPLETE_INPUT } from '../emails-input';
 import { getChildren } from '../test-helper';
+import { isFunction } from '../utils';
 // scrollIntoView is not supported by jsdom
 window.HTMLElement.prototype.scrollIntoView = function() {};
 const sandbox = (additionalTags: string = '') => {
@@ -34,7 +35,6 @@ describe('EmailsInput', () => {
       });
     });
     describe('second argument', () => {
-      let instance: EmailsInputAPI;
       let divContainer: HTMLDivElement;
       beforeEach(() => {
         divContainer = document.querySelector('#emails-input');
@@ -95,7 +95,7 @@ describe('EmailsInput', () => {
         });
         it('should set respective internal style to the root div', () => {
           const maxHeight = '500px';
-          const instance = EmailsInput(divContainer, { maxHeight });
+          EmailsInput(divContainer, { maxHeight });
           expect(divContainer.style.maxHeight).toEqual(maxHeight);
         });
       });
@@ -407,6 +407,142 @@ describe('EmailsInput', () => {
       });
       it('should return false for provided invalid email', () => {
         expect(instance.isEmailValid('invalid_one')).toEqual(false);
+      });
+    });
+    describe('onEmailsChange', () => {
+      it('expects callback function as an argument', () => {
+        expect(() => {
+          // @ts-ignore
+          instance.onEmailsChange('not a function');
+        }).toThrowError(
+          new Error(
+            'EmailsInput : onEmailsChange method expects a function as an argument'
+          )
+        );
+      });
+      it('callback function should be called when email node is deleted', () => {
+        // arrange
+        const callback = jest.fn();
+        // set two emails
+        instance.setEmails(['A', 'B']);
+        // set callback
+        instance.onEmailsChange(callback);
+
+        // prepare email node deletion
+        let children = getChildren(divContainer);
+        expect(children.length).toEqual(3);
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+        });
+
+        // act - emulate first email node deletion
+        children[0].querySelector('span').dispatchEvent(clickEvent);
+
+        // assert
+        expect(callback).toBeCalledWith(['B']);
+      });
+      it('callback function should be called when email node is added', () => {
+        // arrange
+        const callback = jest.fn();
+        // set callback
+        instance.onEmailsChange(callback);
+
+        // find input node
+        const inputNode: HTMLInputElement = divContainer.querySelector(
+          'input.input'
+        );
+        inputNode.value = VALID_EMAIL;
+        // simulate the final completion event initiated from [enter]
+        const enterEvent = new KeyboardEvent('keyup', {
+          bubbles: true,
+          key: 'Enter',
+        });
+
+        // act - add email
+        inputNode.dispatchEvent(enterEvent);
+
+        // assert
+        expect(callback).toBeCalledWith([VALID_EMAIL]);
+      });
+      it('callback function should be called for every time setEmails is called', () => {
+        // arrange
+        const callback = jest.fn();
+        // set callback
+        instance.onEmailsChange(callback);
+        // act
+        const multipleEmails = ['A', 'B', 'C'];
+        instance.setEmails(multipleEmails);
+
+        // assert
+        expect(callback).toBeCalledTimes(1);
+        expect(callback).toBeCalledWith(multipleEmails);
+        // act
+        instance.setEmails([VALID_EMAIL]);
+        // assert
+        expect(callback).toBeCalledTimes(2);
+        expect(callback).toHaveBeenLastCalledWith([VALID_EMAIL]);
+      });
+      it('returns unsubscribe function', () => {
+        const callback = jest.fn();
+        const unsubscribeFn = instance.onEmailsChange(callback);
+        expect(isFunction(unsubscribeFn)).toBeTruthy();
+      });
+      it('if unsubscribe function is called, callback should stop receiving updates', () => {
+        // arrange
+        const callback = jest.fn();
+        // set callback
+        const unsubscribeFn = instance.onEmailsChange(callback);
+
+        const multipleEmails = ['A', 'B', 'C'];
+        instance.setEmails(multipleEmails);
+
+        // initial assert
+        expect(callback).toBeCalledTimes(1);
+        expect(callback).toBeCalledWith(multipleEmails);
+
+        // act
+        unsubscribeFn();
+        // change emails
+        instance.setEmails([INVALID_EMAIL]);
+
+        // assert
+        expect(callback).toBeCalledTimes(1);
+        expect(callback).toHaveBeenLastCalledWith(multipleEmails);
+      });
+      it('complex test with to subscriptions', () => {
+        // arrange
+        const callbackOne = jest.fn();
+        const callbackTwo = jest.fn();
+        // set callback
+        const unsubscribeFnOne = instance.onEmailsChange(callbackOne);
+        const unsubscribeFnTwo = instance.onEmailsChange(callbackTwo);
+
+        const changeOne = [VALID_EMAIL];
+        const changeTwo = [INVALID_EMAIL];
+        const changeThree = [VALID_EMAIL, INVALID_EMAIL];
+
+        // round one - both should be notified
+        instance.setEmails(changeOne);
+        expect(callbackOne).toBeCalledTimes(1);
+        expect(callbackOne).toBeCalledWith(changeOne);
+        expect(callbackTwo).toBeCalledTimes(1);
+        expect(callbackTwo).toBeCalledWith(changeOne);
+
+		// round two - unsubscribe first, second should be notified
+        unsubscribeFnOne();
+		instance.setEmails(changeTwo);
+		expect(callbackOne).toBeCalledTimes(1);
+		expect(callbackOne).toHaveBeenLastCalledWith(changeOne);
+		expect(callbackTwo).toBeCalledTimes(2);
+		expect(callbackTwo).toHaveBeenLastCalledWith(changeTwo);
+
+		// round three - unsubscribe second, none should be notified
+		unsubscribeFnTwo();
+		instance.setEmails(changeThree);
+		expect(callbackOne).toBeCalledTimes(1);
+		expect(callbackOne).toHaveBeenLastCalledWith(changeOne);
+		expect(callbackTwo).toBeCalledTimes(2);
+		expect(callbackTwo).toHaveBeenLastCalledWith(changeTwo);
       });
     });
   });

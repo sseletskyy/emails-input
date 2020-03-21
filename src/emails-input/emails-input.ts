@@ -2,16 +2,24 @@ import polyfills from './polyfills';
 import styles from './styles';
 import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
-import { parsePastedText, validateEmail } from './utils';
+import { isFunction, parsePastedText, validateEmail } from './utils';
 
 polyfills(); // support IE11
 // custom events
 export const COMPLETE_INPUT = 'emails-input--complete-input-node';
 export const DELETE_EMAIL_NODE = 'emails-input--delete-email-node';
 
+interface EmailChangeCallbackFn {
+  (emails: string[]): void;
+}
+interface UnsubscribeFn {
+  (): void;
+}
+
 export interface EmailsInputAPI {
   getEmails: () => string[];
   setEmails: (emails: string[]) => void;
+  onEmailsChange: (callback: EmailChangeCallbackFn) => UnsubscribeFn;
   // extra method
   isEmailValid: (email: string) => boolean;
 }
@@ -27,6 +35,7 @@ export function EmailsInput(
   config: Partial<Config> = {}
 ): EmailsInputAPI {
   let emailList: string[];
+  const emailsChangeObservers: EmailChangeCallbackFn[] = [];
 
   const _throwError = (message: string) => {
     throw new Error(`EmailsInput : ${message}`);
@@ -63,6 +72,17 @@ export function EmailsInput(
 
   const _addInputNode = () => {
     containerNode.appendChild<HTMLInputElement>(InputNode.create());
+  };
+
+  /**
+   * notify all emailsChangeObservers
+   * this method is called when emailsList is changed
+   *
+   */
+  const _fireOnEmailsChange = () => {
+    emailsChangeObservers.forEach((callback: EmailChangeCallbackFn) => {
+      callback.call(null, emailList);
+    });
   };
 
   const getEmails = (): string[] => {
@@ -102,6 +122,8 @@ export function EmailsInput(
     emailList.push(email);
     // clean un value in input
     target.value = '';
+
+    _fireOnEmailsChange();
   };
 
   const _deleteTargetEmail: EventListener = (event: CustomEvent) => {
@@ -115,6 +137,8 @@ export function EmailsInput(
     }
     // remove email node; IE11 does not support .remove method; so using removeChild instead
     emailNode.parentElement.removeChild(emailNode);
+
+    _fireOnEmailsChange();
   };
 
   const _onKeyUp: EventListener = (event: KeyboardEvent) => {
@@ -213,6 +237,8 @@ export function EmailsInput(
     containerNode
       .appendChild<HTMLInputElement>(InputNode.create())
       .scrollIntoView();
+
+    _fireOnEmailsChange();
   };
 
   const _applyConfig = (config: Partial<Config>) => {
@@ -226,6 +252,23 @@ export function EmailsInput(
     if (minHeight) {
       containerNode.style.minHeight = minHeight;
     }
+  };
+
+  const onEmailsChange = (callback: EmailChangeCallbackFn): UnsubscribeFn => {
+    // validate argument
+    if (!isFunction(callback)) {
+      _throwError('onEmailsChange method expects a function as an argument');
+    }
+
+    emailsChangeObservers.push(callback);
+    // build unsubscribe function
+    return () => {
+      // remove originalCallback from the list
+      const index = emailsChangeObservers.indexOf(callback);
+      if (index > -1) {
+        emailsChangeObservers.splice(index, 1);
+      }
+    };
   };
   const _constructor = () => {
     emailList = [];
@@ -243,6 +286,7 @@ export function EmailsInput(
   return {
     getEmails,
     setEmails,
+    onEmailsChange,
     isEmailValid: validateEmail,
   };
 }

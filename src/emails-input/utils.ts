@@ -22,3 +22,6 @@ export const parsePastedText = (text: string): string[] => {
     return acc;
   }, []);
 };
+
+export const isFunction = (fn: any): boolean =>
+  fn && fn.constructor && fn.call && fn.apply;

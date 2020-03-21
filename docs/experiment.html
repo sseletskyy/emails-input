@@ -36,9 +36,10 @@
     <script src="emails-input.bundle.js"></script>
     <script type="application/javascript">
       function main() {
-        const emailInput = EmailsInput(document.querySelector('.emails-input-1'));
-        EmailsInput(document.querySelector('.emails-input-2'));
-        emailInput.setEmails(['mike@miro.com', 'incorrect']);
+        const emailsInput = EmailsInput(
+          document.querySelector('.emails-input-1')
+        );
+        emailsInput.setEmails(['mike@miro.com', 'incorrect']);
 
         // use case Get Valid Emails Count
         const countBtn = document.querySelector(
@@ -56,7 +57,7 @@
             );
           };
         }
-        countBtn.addEventListener('click', countClickHandler(emailInput));
+        countBtn.addEventListener('click', countClickHandler(emailsInput));
 
         // use case Add Random email
         const addEmailBtn = document.querySelector('button.add-email');
@@ -75,7 +76,24 @@
             instance.setEmails(emails);
           };
         }
-        addEmailBtn.addEventListener('click', addEmailClickHandler(emailInput));
+        addEmailBtn.addEventListener(
+          'click',
+          addEmailClickHandler(emailsInput)
+        );
+
+        ////
+        const emailsInput2 = EmailsInput(
+          document.querySelector('.emails-input-2')
+        );
+        function changeListener(emails) {
+          alert('Email list was update: ' + emails.join('\n'));
+        }
+        const unsubscribe = emailsInput2.onEmailsChange(changeListener);
+        function stopSubscriptionInTenSeconds() {
+          unsubscribe();
+          alert('Email list subscription was stopped');
+        }
+        setTimeout(stopSubscriptionInTenSeconds, 10000);
       }
       document.addEventListener('DOMContentLoaded', main, false);
     </script>
