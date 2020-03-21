@@ -3,6 +3,7 @@ import { css } from 'astroturf';
 const styles = css`
   .fontFamily {
     font-family: Open Sans, sans-serif;
+    font-size: 14px;
   }
 
   .emailsInput {
@@ -12,7 +13,6 @@ const styles = css`
     overflow-y: auto;
     background: #ffffff;
     border: 1px solid #c3c2cf;
-    box-sizing: border-box;
     border-radius: 4px;
     padding: 8px 7px;
   }
@@ -20,11 +20,10 @@ const styles = css`
   .email {
     composes: fontFamily;
     display: inline-block;
-    margin: 2px 0;
-    padding: 5px 10px 5px 12px;
+    margin: 2px 4px;
+    padding: 0 10px;
     font-style: normal;
     font-weight: normal;
-    font-size: 14px;
     line-height: 24px;
     text-align: right;
     color: #050038;
@@ -32,6 +31,7 @@ const styles = css`
   .delete {
     margin-left: 8px;
     cursor: pointer;
+    font-size: 12px;
   }
   .emailStateValid {
     composes: email;

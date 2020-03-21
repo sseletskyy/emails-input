@@ -120,7 +120,7 @@ export function EmailsInput(
     target.parentNode.insertBefore(newEmailNode, target);
     // add email to local list
     emailList.push(email);
-    // clean un value in input
+    // clean up value in the input node
     target.value = '';
 
     _fireOnEmailsChange();

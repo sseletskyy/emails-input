@@ -1,7 +1,14 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
 
+const CompressionPlugin = require('compression-webpack-plugin');
+
+const analyzer = process.env.ENABLE_WEBPACK_ANALYZER
+  ? new BundleAnalyzerPlugin()
+  : () => {};
 module.exports = {
   entry: {
     index: './src/index.ts',
@@ -15,7 +22,6 @@ module.exports = {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'docs'),
   },
-  devtool: 'source-map',
   devServer: {
     contentBase: './docs',
   },
@@ -42,5 +48,9 @@ module.exports = {
       template: 'src/index.html',
       favicon: 'src/favicon.ico',
     }),
+    new CompressionPlugin({
+      include: /emails-input/,
+    }),
+    analyzer,
   ],
 };
