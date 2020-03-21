@@ -28,7 +28,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
 
   const getEmails = (): string[] => {
     // return a cloned array, no way to impact on the list outside
-    return Array.from(emailList);
+    return Array.apply({}, emailList);
   };
 
   const _dispatchCompleteInput = (target: HTMLInputElement) => {

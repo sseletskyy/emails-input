@@ -186,7 +186,7 @@ function EmailsInput(containerNode) {
     };
     var getEmails = function () {
         // return a cloned array, no way to impact on the list outside
-        return Array.from(emailList);
+        return Array.apply({}, emailList);
     };
     var _dispatchCompleteInput = function (target) {
         var customEvent = new CustomEvent(COMPLETE_INPUT, {
