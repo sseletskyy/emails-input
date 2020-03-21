@@ -13,22 +13,25 @@ module.exports = {
   },
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'docs'),
   },
   devtool: 'source-map',
   devServer: {
-    contentBase: './dist',
+    contentBase: './docs',
   },
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
+        test: /\.css$/,
+        use: ['style-loader', 'astroturf/css-loader'],
       },
       {
         test: /\.less$/,
         use: ['style-loader', 'css-loader', 'less-loader'],
+      },
+      {
+        test: /\.tsx?$/,
+        use: ['ts-loader', 'astroturf/loader'],
       },
     ],
   },

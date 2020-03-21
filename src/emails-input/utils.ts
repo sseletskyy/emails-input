@@ -15,7 +15,7 @@ export const parsePastedText = (text: string): string[] => {
     let angleBrackets = email.match(/<([^>]*)>/);
     if (angleBrackets && angleBrackets[1]) {
       email = angleBrackets[1].trim();
-	}
+    }
     if (!!email) {
       acc.push(email);
     }

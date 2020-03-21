@@ -1,4 +1,5 @@
 import polyfills from './polyfills';
+import styles from './styles';
 import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
 import { parsePastedText, validateEmail } from './utils';
@@ -18,6 +19,8 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   let emailList: string[];
   const _constructor = () => {
     emailList = [];
+    // set style to container
+    containerNode.classList.add(styles.emailsInput);
     _addInputNode();
     _setEventListeners();
   };
@@ -50,7 +53,7 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
   const _convertInputToNode: EventListener = (event: CustomEvent) => {
     // console.log('CustomEventListener :: ', event);
     const target = event.target as HTMLInputElement;
-    const email = target.value.replace(/,/g, '');
+    const email = target.value?.replace(/,/g, '');
     // early return if email is empty or just comma
     if (!email) {
       // do nothing;
@@ -74,8 +77,8 @@ export function EmailsInput(containerNode: HTMLElement): EmailsInputAPI {
     if (emailIndex >= 0) {
       emailList.splice(emailIndex, 1);
     }
-    // remove email node
-    target.parentElement.remove();
+    // remove email node; IE11 does not support .remove method; so using removeChild instead
+    emailNode.parentElement.removeChild(emailNode);
   };
 
   const _onKeyUp: EventListener = (event: KeyboardEvent) => {

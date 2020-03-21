@@ -1,4 +1,5 @@
 import { validateEmail } from './utils';
+import styles from './styles';
 
 interface CreateFnReturnType {
   div: HTMLDivElement;
@@ -36,14 +37,14 @@ const EmailNodeFn = (): EmailNodeAPI => {
 
     // check email and decide which css class to use
     const isValid = validateEmail(noEndingComma);
-    const stateClass = isValid ? 'email--state-valid' : 'email--state-invalid';
-    div.className = `email ${stateClass}`;
+    const stateClass = isValid ? 'emailStateValid' : 'emailStateInvalid';
+    div.className = styles[stateClass];
     // set data attributes for re-usage
     div.setAttribute('data-email', noEndingComma);
     div.setAttribute('data-valid', String(isValid));
     const span = document.createElement('span');
     span.innerHTML = '&#10005';
-    span.className = 'delete';
+    span.className = styles.delete;
     div.appendChild(span);
     return { div, email: noEndingComma };
   };
@@ -54,7 +55,7 @@ const EmailNodeFn = (): EmailNodeAPI => {
    */
   const isDeleteButton = (target: HTMLElement): boolean =>
     target.tagName.toLowerCase() === 'span' &&
-    target.classList.contains('delete');
+    target.classList.contains(styles.delete);
 
   return {
     create,

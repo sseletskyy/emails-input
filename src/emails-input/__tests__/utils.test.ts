@@ -39,8 +39,8 @@ describe('parsePastedText', () => {
     });
   });
   describe('when provided text is empty', () => {
-  	it('should return an empty array', () => {
-  		expect(parsePastedText('   ')).toEqual([]);
-	})
-  })
+    it('should return an empty array', () => {
+      expect(parsePastedText('   ')).toEqual([]);
+    });
+  });
 });

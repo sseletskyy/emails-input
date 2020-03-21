@@ -10,6 +10,7 @@ ${additionalTags}
 };
 const VALID_EMAIL = 'mike@miro.com';
 const INVALID_EMAIL = 'invalid@';
+const INPUT_SELECTOR = 'input.input';
 
 const checkNodeIsAnInput = (node: HTMLInputElement | any): void => {
   expect(node.type).toEqual('text');
@@ -43,7 +44,7 @@ describe('EmailsInput', () => {
           expect(children.length).toEqual(1);
           // find input node
           const inputNode: HTMLInputElement = divContainer.querySelector(
-            'input.email'
+            'input.input'
           );
           inputNode.value = VALID_EMAIL;
           // simulate the final completion event initiated from [enter]
@@ -67,7 +68,7 @@ describe('EmailsInput', () => {
           expect(children.length).toEqual(1);
           // find input node
           const inputNode: HTMLInputElement = divContainer.querySelector(
-            'input.email'
+            'input.input'
           );
           inputNode.value = emailWithComma;
           // simulate the final completion event initiated from [comma]
@@ -92,7 +93,7 @@ describe('EmailsInput', () => {
           expect(children.length).toEqual(1);
           // find input node
           const inputNode: HTMLInputElement = document.querySelector(
-            'input.email'
+            INPUT_SELECTOR
           );
           inputNode.value = INVALID_EMAIL;
 
@@ -115,7 +116,7 @@ describe('EmailsInput', () => {
           expect(children.length).toEqual(1);
           // find input node
           const inputNode: HTMLInputElement = document.querySelector(
-            'input.email'
+            INPUT_SELECTOR
           );
           inputNode.value = '';
           // simulate the final completion event initiated from [enter], [comma] or out of focus
@@ -136,7 +137,7 @@ describe('EmailsInput', () => {
           expect(children.length).toEqual(1);
           // find input node
           const inputNode: HTMLInputElement = document.querySelector(
-            'input.email'
+            INPUT_SELECTOR
           );
           inputNode.value = ',';
           // simulate the final completion event initiated from [enter], [comma] or out of focus
@@ -157,7 +158,7 @@ describe('EmailsInput', () => {
           expect(children.length).toEqual(1);
           // find input node
           const inputNode: HTMLInputElement = document.querySelector(
-            'input.email'
+            INPUT_SELECTOR
           );
           inputNode.value = ',,,,';
           // simulate the final completion event initiated from [enter], [comma] or out of focus

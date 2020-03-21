@@ -32,7 +32,7 @@ describe('EmailNode', () => {
           const { div } = EmailNode.create(VALID_EMAIL);
           const classList = Array.from(div.classList);
           expect(classList).toEqual(
-            expect.arrayContaining(['email', 'email--state-valid'])
+            expect.arrayContaining(['emailStateValid'])
           );
         });
       });
@@ -41,7 +41,7 @@ describe('EmailNode', () => {
           const { div } = EmailNode.create(INVALID_EMAIL);
           const classList = Array.from(div.classList);
           expect(classList).toEqual(
-            expect.arrayContaining(['email', 'email--state-invalid'])
+            expect.arrayContaining(['emailStateInvalid'])
           );
         });
       });
@@ -86,6 +86,17 @@ describe('EmailNode', () => {
           // assert
           expect(onDelete).not.toBeCalled();
         });
+      });
+    });
+    describe('isDeleteButton', () => {
+      it('should return true of target node in click event is a span element', () => {
+        const el = document.createElement('span');
+        el.classList.add('delete');
+        expect(EmailNode.isDeleteButton(el)).toBeTruthy();
+      });
+      it('should return false otherwise', () => {
+        const el = document.createElement('span');
+        expect(EmailNode.isDeleteButton(el)).toBeFalsy();
       });
     });
   });

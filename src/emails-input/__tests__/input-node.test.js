@@ -23,9 +23,7 @@ describe('InputNode', () => {
       it('should return an input element with respective css class', () => {
         const input = InputNode.create();
         const classList = Array.from(input.classList);
-        expect(classList).toEqual(
-          expect.arrayContaining(['email', 'email--state-input'])
-        );
+        expect(classList).toEqual(expect.arrayContaining(['input']));
       });
       it('should return an input element with a placeholder', () => {
         const input = InputNode.create();
