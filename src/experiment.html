@@ -33,7 +33,8 @@
         </div>
       </div>
     </div>
-    <script src="emails-input.bundle.js"></script>
+    <script src="emails-input.js"></script>
+    <script src="emails-input-class.js"></script>
     <script type="application/javascript">
       function main() {
         const emailsInput = EmailsInput(
@@ -81,7 +82,7 @@
           addEmailClickHandler(emailsInput)
         );
 
-        const emailsInput2 = EmailsInput(
+        const emailsInput2 = EmailsInputClass(
           document.querySelector('.emails-input-2')
         );
         function changeListener(emails) {
