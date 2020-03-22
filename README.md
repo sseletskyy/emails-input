@@ -51,9 +51,9 @@ interface Config {
 
 | Name              | Type             | Description                                                                                                                                                                                                                                                                                                |
 | ----------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **defaultEmails** | array of strings | - component will render with provided list of emails;<br>- component will raise an error if the type is not an array;<br>- component will raise an error if any element of the array is not a string;<br> - example `['invalid_email', 'valid@email.com', '12345']`                                        |
+| **defaultEmails** | array of strings | - component will render with provided list of emails;<br>- component will raise an error if the type is not an array;<br>- component will raise an error if any element of the array is not a string;<br> - valid example `['invalid_email', 'valid@email.com', '12345']`;<br>- invalid example `[123]`    |
 | **maxHeight**     | string           | sets internal style `{max-height: <value>}` to limit the maximum height of the container when too many emails are added;<br> - the format of the string should be the same as for related css property;<br>- component will raise an error if the type is not a string;<br>- examples: `'450px'`, `'5rem'` |
-| **minHeight**     | string           | sets internal style `{min-height: <value>}` to limit the minimum height of the container <br> - the format of the string should be the same as for related css property;<br>- component will raise an error if the type is not a string;<br>- examples: `'450px'`, `'5rem'`                                |
+| **minHeight**     | string           | sets internal style `{min-height: <value>}` to limit the minimum height of the container <br> - the format of the string should be the same as for related css property;<br>- component will raise an error if the type is not a string;<br>- examples: `'100px'`, `'1rem'`                                |
 
 ## Instance API
 
@@ -81,10 +81,10 @@ interface UnsubscribeFn {
 
 | Name               | Type     | Description                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **getEmails**      | function | - a method to get all entered emails. Both valid and invalid<br> - does not require any arguments<br>- returns array of strings<br>                                                                                                                                                                                                                         |
-| **setEmails**      | function | - a method to replace all entered emails with new ones<br> - expects array of strings as the argument<br>- does not return anything<br>- all commas are removed from the string<br>-all trailing spaces are moved from the string<br>- string in format `First Last Name <email@address.com>` is truncated to `email@address.com`                           |
-| **onEmailsChange** | function | a method provides ability to subscribe for emails list changes<br>- expects a callback function which will be called on any changes in emails list<br>- an array of strings will be provided as the argument to the callback function<br>- returns `unsubscribe` function, call it to unsubscribe callback from getting new updates <br>- see example below |
-| **isEmailValid**   | function | a method to check any string if it is a valid email                                                                                                                                                                                                                                                                                                         |
+| **getEmails**      | function | - a method to get all entered emails, both valid and invalid<br> - does not require any arguments<br>- returns array of strings<br>                                                                                                                                                                                                                         |
+| **setEmails**      | function | - a method to replace all entered emails with new ones<br> - expects array of strings as the argument<br>- does not return anything<br>- all commas are removed from every string<br>- all trailing spaces are moved from every string<br>- a string in format `First Last Name <email@address.com>` is truncated to `email@address.com`                           |
+| **onEmailsChange** | function | - a method provides ability to subscribe for emails list changes<br>- expects a callback function which will be called on any changes in emails list<br>- an array of strings will be provided as the argument to the callback function<br>- returns `unsubscribe` function, call it to unsubscribe callback from getting new updates <br>- see example below |
+| **isEmailValid**   | function | - a method to check any string if it is a valid email                                                                                                                                                                                                                                                                                                         |
 
 Email validation is implemented with RegExp from [W3C documentation](<https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type=email)>)
 
@@ -172,8 +172,11 @@ Email validation is implemented with RegExp from [W3C documentation](<https://ht
 
 #### Subscribe to email list changes
 
-Subscribe to email list changes - show alert with a list of emails
-Unsubscribe from changes in 1 minute after page is loaded
+Subscribe to email list changes - show alert with a list of emails.
+
+Unsubscribe from changes in 1 minute.
+
+Add email manually using input field, or delete some emails to see an alert of every change.
 
 ```html
 ...
@@ -231,11 +234,11 @@ Component codebase consists of these files
 - `email-node.ts` - a presenter of email block, provides two API methods
   - `create` - to create a new email block (HTMLDivElement with `<span>` as a delete button)
   - `isDeleteButton` - to check if the target element is the one with 'X' character to delete the block. It is used in `onClick` handler of the root component
-- `input-node.ts` - a presenter of input field, provides one one API method
-  - `create' - to create a HTMLInputElement
+- `input-node.ts` - a presenter of input field, provides one API method
+  - `create` - to create an HTMLInputElement
 - `polyfills.ts` - contains an implementation of `CustomEvent` for `IE11`
-- `styles.ts` - css styles for the component and its children. It uses npm module `astroturf` - zero runtime CSS-in-JS with Typescript support. Unfortunately, this library does not work with `jest` properly. That's why I implemented a mock for it. It's located in `./src/__mocks__/astroturf.js`
-- `test-helper.ts` - methods used in unit tests, this file is not included in production bundle.
+- `styles.ts` - css styles for the component and its children. It uses npm library `astroturf` - zero runtime CSS-in-JS with Typescript support. Unfortunately, this library does not work with `jest` properly. That's why I implemented a mock for it. It's located in `./src/__mocks__/astroturf.js`
+- `test-helper.ts` - some methods used in unit tests, this file is not included in production bundle.
 - `utils.ts` - utility methods
   - `validateEmail` - check email using regexp
   - `parsePastedText` - split pasted text into multiple email strings
@@ -249,11 +252,12 @@ Root component defines 3 generic event listeners and 2 custom ones
 - `focusout` -> method `_onFocusout` - dispatches custom event `COMPLETE_INPUT`
 - `COMPLETE_INPUT` -> method `_convertInputToNode` - creates a new email block based on value in input field
 - `click` -> method `_onClick` checks the target element and dispatches custom event `DELETE_EMAIL_NODE`
-- `DELETE_EMAIL_NODE` -> method `_deleteTargetEmail` - removes clicked email block
-- `paste` -> method `_onPaste` - parses pasted text in input field and creates multiple email blocks in case pasted text contains `comma` characters (at least one)
+- `DELETE_EMAIL_NODE` -> method `_deleteTargetEmail` - removes a clicked email block
+- `paste` -> method `_onPaste` - parses pasted text in the input field and creates multiple email blocks in case pasted text contains `comma` characters (at least one)
 
-Root component implements `Observer` pattern to provide `subscribe/unsubscribe` interface for external listeners
-Instance of the component implements method `onEmailsChange` as `subscribe`
+Root component implements `Observer` pattern to provide `subscribe/unsubscribe` interface for external listeners.
+
+Instance of the component implements method `onEmailsChange` (aka `subscribe`).
 
 - it expects a `callback` function as an argument
 - it returns `unsubscribe` function; this function should be called whenever `callback` should stop receiving updates
@@ -267,14 +271,14 @@ const callbackFn = (emailArray: string[]) => {
   console.log(emailArray.join(', '));
 };
 const cancelCallback = instance.onEmailsChange(callbackFn);
-// when: user added a new email block manually; email list contains a single value 'new@email'
+// when: user adds a new email block manually; email list contains a single value 'new@email'
 // then: instance calls callback function automatically
 // like that callbackFn(['new@email'])
-// as the result a string 'new@email' is shown in browser console
+// as the result a string 'new@email' is shown in the browser console
 
 // given: stop receiving updates
 cancelCallback();
-// when: user added a new email block; email list contains two values ['new@email','second']
+// when: user adds a new email block; email list contains two values ['new@email','second']
 // then: callbackFn is not called any more;
 ```
 
@@ -303,4 +307,4 @@ cancelCallback();
 
 `npm run build:analyzer` - to build production version of the code and open webpack analyzer in the browser
 
-`npm run format` - run `prettier` with flag --write for all files in `./src`
+`npm run format` - to run `prettier` with flag --write for all files in `./src`
