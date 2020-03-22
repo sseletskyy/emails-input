@@ -556,6 +556,27 @@ describe('EmailsInput', () => {
         expect(callbackTwo).toHaveBeenLastCalledWith(changeTwo);
       });
     });
+    describe('destroy', () => {
+      it('should remove all event listeners and delete all observers and remove itself from divContainer', () => {
+        // arrange
+        divContainer = document.querySelector('#emails-input');
+        instance = EmailsInput(divContainer, { defaultEmails: [VALID_EMAIL] });
+        // set observer
+        const observer = jest.fn();
+        instance.onEmailsChange(observer);
+        // act
+        expect(instance.destroy()).toBeTruthy();
+        // assert
+        // container is clean
+        expect(divContainer.children.length).toEqual(0);
+        // instance does not read/write any more
+        expect(instance.getEmails()).toEqual([]);
+        instance.setEmails([VALID_EMAIL, INVALID_EMAIL]);
+        expect(instance.getEmails()).toEqual([]);
+        // second call destroy does nothing
+        expect(instance.destroy()).toBeFalsy();
+      });
+    });
   });
   describe('Use Case: Add Email - using external btn to add a new email', () => {
     /**

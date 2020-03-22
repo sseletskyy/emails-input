@@ -22,6 +22,7 @@ export interface EmailsInputAPI {
   onEmailsChange: (callback: EmailChangeCallbackFn) => UnsubscribeFn;
   // extra method
   isEmailValid: (email: string) => boolean;
+  destroy: () => void;
 }
 
 export interface Config {
@@ -34,9 +35,15 @@ export function EmailsInput(
   containerNode: HTMLElement,
   config: Partial<Config> = {}
 ): EmailsInputAPI {
+  /**
+   * local params
+   */
   let rootNode: HTMLDivElement;
   let emailList: string[];
-  const emailsChangeObservers: EmailChangeCallbackFn[] = [];
+  const emailsChangeObservers: Set<EmailChangeCallbackFn> = new Set<
+    EmailChangeCallbackFn
+  >();
+  let destroyed = false; // flag is set to true in destroy method
 
   const _throwError = (message: string) => {
     throw new Error(`EmailsInput : ${message}`);
@@ -211,6 +218,16 @@ export function EmailsInput(
     rootNode.addEventListener('paste', _onPaste, true);
   };
 
+  const _removeEventListeners = () => {
+    // in reverse order
+    rootNode.removeEventListener('paste', _onPaste, true);
+    rootNode.removeEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
+    rootNode.removeEventListener('click', _onClick);
+    rootNode.removeEventListener(COMPLETE_INPUT, _convertInputToNode);
+    rootNode.removeEventListener('focusout', _onFocusout);
+    rootNode.removeEventListener('keyup', _onKeyUp);
+  };
+
   const _validateIncomingEmails = (emails: string[] | any) => {
     if (
       !Array.isArray(emails) ||
@@ -226,6 +243,10 @@ export function EmailsInput(
     rootNode.innerHTML = '';
   };
   const setEmails = (emails: string[]): void => {
+    // do nothing if destroy method was called
+    if (destroyed) {
+      return;
+    }
     _validateIncomingEmails(emails);
     _clearChildren();
     emailList = [];
@@ -259,16 +280,32 @@ export function EmailsInput(
       _throwError('onEmailsChange method expects a function as an argument');
     }
 
-    emailsChangeObservers.push(callback);
+    emailsChangeObservers.add(callback);
     // build unsubscribe function
     return () => {
       // remove originalCallback from the list
-      const index = emailsChangeObservers.indexOf(callback);
-      if (index > -1) {
-        emailsChangeObservers.splice(index, 1);
-      }
+      emailsChangeObservers.delete(callback);
     };
   };
+  /**
+   * call this method before considering deleting the containerNode
+   * returns true if called first time, otherwise returns false
+   */
+  const destroy = (): boolean => {
+    if (destroyed) {
+      return false;
+    }
+    destroyed = true;
+    _removeEventListeners();
+    // remove observers
+    emailsChangeObservers.clear();
+    // clean up containerNode
+    containerNode.innerHTML = '';
+    // clean up emailList
+    emailList = [];
+    return true;
+  };
+
   const _constructor = () => {
     emailList = [];
     _validateFirstArgument(containerNode);
@@ -292,6 +329,7 @@ export function EmailsInput(
     setEmails,
     onEmailsChange,
     isEmailValid: validateEmail,
+    destroy,
   };
 }
 
