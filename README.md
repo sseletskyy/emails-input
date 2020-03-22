@@ -313,16 +313,15 @@ cancelCallback();
 
 `npm run format` - to run `prettier` with flag --write for all files in `./src`
 
-
 ### Alternative version
 
-Initially I've created the component by using object approach. That approach provides two major benefits:
-* no need to deal with `this`
-* easy to hide private methods and properties
+Initially I've created the component by using object approach. That approach provides three major benefits:
 
-It has only one major drawback - memory footprint. Two instances have their own copies of all methods.
+- no need to deal with `this`
+- easy to hide private methods and properties
+- split the code base between static and dynamic methods to reduce memory footprint of the instance (although such splitting added 1300KB to the size of the bundle)
 
-So I decided to implement another copy using class approach - `emails-input-class.ts`
+I decided to implement another copy using class approach - `emails-input-class.ts`
 I used the same test suite to check that the second implementation complies with the same specification requirements.
 
 When the script `emails-input-class.js` is loaded, it adds a global variable `EmailsInputClass` which is a constructor function
