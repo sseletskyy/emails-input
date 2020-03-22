@@ -47,9 +47,9 @@
           'button.get-valid-emails-count'
         );
         function countClickHandler(instance) {
-          return function() {
+          return function () {
             const emails = instance.getEmails();
-            const validEmails = emails.filter(function(email) {
+            const validEmails = emails.filter(function (email) {
               return instance.isEmailValid(email);
             });
             alert(
@@ -71,7 +71,7 @@
           ].join('');
         }
         function addEmailClickHandler(instance) {
-          return function() {
+          return function () {
             const emails = instance.getEmails();
             emails.push(randomEmail());
             instance.setEmails(emails);

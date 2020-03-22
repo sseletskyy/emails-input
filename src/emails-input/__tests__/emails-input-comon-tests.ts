@@ -663,7 +663,7 @@ ${additionalTags}
         instance = EmailsInput(divContainer);
         countValidEmailsBtn = document.getElementById('count-valid-emails-btn');
       });
-      it('when click on external btn should get list of all emails, validate each, and return count of valid', done => {
+      it('when click on external btn should get list of all emails, validate each, and return count of valid', (done) => {
         // arrange
         const initialEmails = [
           'valid@email.com',
@@ -675,7 +675,7 @@ ${additionalTags}
         // set click handler: getEmails, find valid ones, return count of valid
         const btnClickHandler = () => {
           const emails: string[] = instance.getEmails();
-          const validEmails = emails.filter(email =>
+          const validEmails = emails.filter((email) =>
             instance.isEmailValid(email)
           );
           // assert

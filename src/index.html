@@ -72,7 +72,12 @@
             </p>
             <div
               class="emails-input-2"
-              style="width: 400px; height: 200px; border: 1px dashed orange;padding:1px;"
+              style="
+                width: 400px;
+                height: 200px;
+                border: 1px dashed orange;
+                padding: 1px;
+              "
             ></div>
           </div>
         </div>
@@ -115,9 +120,9 @@
 
         // use case Get Valid Emails Count
         function countClickHandler(instance) {
-          return function() {
+          return function () {
             const emails = instance.getEmails();
-            const validEmails = emails.filter(function(email) {
+            const validEmails = emails.filter(function (email) {
               return instance.isEmailValid(email);
             });
             alert(
@@ -147,7 +152,7 @@
           ].join('');
         }
         function addEmailClickHandler(instance) {
-          return function() {
+          return function () {
             const emails = instance.getEmails();
             emails.push(randomEmail());
             instance.setEmails(emails);

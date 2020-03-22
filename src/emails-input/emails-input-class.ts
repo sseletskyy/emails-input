@@ -196,7 +196,7 @@ class EmailsInputComponent implements EmailsInputComponentInterface {
     }
     // otherwise add them all immediately
     // add new emails without re-rendering existing ones
-    parsed.forEach(item => {
+    parsed.forEach((item) => {
       const { div, email } = EmailNode.create(item);
       this.rootNode.insertBefore(div, input);
       // add email to local list
@@ -270,7 +270,7 @@ class EmailsInputComponent implements EmailsInputComponentInterface {
   private static _validateIncomingEmails(emails: string[] | any) {
     if (
       !Array.isArray(emails) ||
-      emails.filter(email => typeof email !== 'string')[0]
+      emails.filter((email) => typeof email !== 'string')[0]
     ) {
       EmailsInputComponent._throwError(
         'setEmails method expects an array of strings as an argument'
@@ -307,7 +307,7 @@ class EmailsInputComponent implements EmailsInputComponentInterface {
     EmailsInputComponent._validateIncomingEmails(emails);
     this._clearChildren();
     this.emailList = [];
-    emails.forEach(email => {
+    emails.forEach((email) => {
       const { div: item, email: finalEmailString } = EmailNode.create(email);
       this.rootNode.appendChild<HTMLDivElement>(item);
       // add the same email string (as it is in email node) to emailList

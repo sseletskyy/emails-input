@@ -4,12 +4,12 @@
  * @param ary[]
  * @return Record<string,string>
  */
-export const css = ary => {
+export const css = (ary) => {
   // get first string from the array
   const value =
     typeof ary === 'string' ? ary : Array.isArray(ary) ? ary[0] : '';
   const result = (value.match(/(\.[^\r\n,{};]+)[{:]/g) || []).map(
-    item =>
+    (item) =>
       item
         .split(' {')[0] // remove { at the end
         .split(':')[0] // remove everything to the right of colon

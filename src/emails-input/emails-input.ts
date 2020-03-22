@@ -23,78 +23,15 @@ export function EmailsInput(
    * local params
    */
   let rootNode: HTMLDivElement;
-  let emailList: string[];
+  const emailList: string[] = [];
   const emailsChangeObservers: Set<EmailChangeCallbackFn> = new Set<
     EmailChangeCallbackFn
   >();
   let destroyed = false; // flag is set to true in destroy method
 
-  const _throwError = (message: string) => {
-    throw new Error(`EmailsInput : ${message}`);
-  };
-
-  const _validateFirstArgument = (node: any) => {
-    if (!(node instanceof HTMLElement)) {
-      _throwError('constructor expects HTMLElement as the first argument');
-    }
-  };
-  const _validateSecondArgument = (config: Partial<Config> | any) => {
-    if (!(config instanceof Object)) {
-      _throwError('constructor expects Object as the second argument');
-    }
-    const { defaultEmails, maxHeight, minHeight } = config;
-    // throw if 1) not an array (skip if undefined)  2) or array is not empty and at least one element is not a string
-    if (
-      (defaultEmails !== undefined && !Array.isArray(defaultEmails)) ||
-      (Array.isArray(defaultEmails) &&
-        defaultEmails?.length > 0 &&
-        defaultEmails?.filter((item: any) => typeof item !== 'string').length >
-          0)
-    ) {
-      _throwError('config.defaultEmails should be a type of string[]');
-    }
-
-    if (maxHeight !== undefined && typeof maxHeight !== 'string') {
-      _throwError('config.maxHeight should be a type of string');
-    }
-    if (minHeight !== undefined && typeof minHeight !== 'string') {
-      _throwError('config.minHeight should be a type of string');
-    }
-  };
-
-  const _addInputNode = () => {
-    rootNode.appendChild<HTMLInputElement>(InputNode.create());
-  };
-
-  /**
-   * notify all emailsChangeObservers
-   * this method is called when emailsList is changed
-   *
-   */
-  const _fireOnEmailsChange = () => {
-    emailsChangeObservers.forEach((callback: EmailChangeCallbackFn) => {
-      callback.call(null, emailList);
-    });
-  };
-
   const getEmails = (): string[] => {
     // return a cloned array, no way to impact on the list outside
     return Array.apply({}, emailList);
-  };
-
-  const _dispatchCompleteInput = (target: HTMLInputElement) => {
-    const customEvent = new CustomEvent(COMPLETE_INPUT, {
-      bubbles: true,
-    });
-    return target.dispatchEvent(customEvent);
-  };
-
-  const _dispatchDeleteEmailNode = (event: Event) => {
-    const targetSpan: HTMLSpanElement = event.target as HTMLSpanElement;
-    const customEvent = new CustomEvent(DELETE_EMAIL_NODE, {
-      bubbles: true,
-    });
-    return targetSpan.dispatchEvent(customEvent);
   };
 
   // this is a listener of the custom event COMPLETE_INPUT
@@ -115,10 +52,10 @@ export function EmailsInput(
     // clean up value in the input node
     target.value = '';
 
-    _fireOnEmailsChange();
+    EmailsInput._fireOnEmailsChange(emailsChangeObservers, getEmails());
   };
 
-  const _deleteTargetEmail: EventListener = (event: CustomEvent) => {
+  const _deleteTargetEmail = (event: CustomEvent) => {
     const target = event.target as HTMLDivElement;
     const { parentElement: emailNode } = target;
     // remove email from emailList
@@ -130,110 +67,40 @@ export function EmailsInput(
     // remove email node; IE11 does not support .remove method; so using removeChild instead
     emailNode.parentElement.removeChild(emailNode);
 
-    _fireOnEmailsChange();
+    EmailsInput._fireOnEmailsChange(emailsChangeObservers, getEmails());
   };
 
-  const _onKeyUp: EventListener = (event: KeyboardEvent) => {
-    // keyCode and comparison with numbers are for backward compatibility with IE
-    // noinspection JSDeprecatedSymbols
-    const key = event.key || event.keyCode;
-    if (key === 'Enter' || key === 13 || key === ',' || key === 188) {
-      _dispatchCompleteInput(event.target as HTMLInputElement);
-    }
-  };
-
-  const _onFocusout: EventListener = (event: Event) => {
-    _dispatchCompleteInput(event.target as HTMLInputElement);
-  };
-
-  const _onClick: EventListener = (event: MouseEvent) => {
-    // call custom event only if clicked on cross character in email-node
-    const target: HTMLElement = event.target as HTMLElement;
-    if (EmailNode.isDeleteButton(target)) {
-      _dispatchDeleteEmailNode(event);
-    }
-  };
-
-  // this method is not covered with tests cause js-dom does not support ClipboardEvent
-  // so the logic of parsing is moved to utils :: parsePastedText and covered with unit tests
-  const _onPaste: EventListener = (event: ClipboardEvent) => {
-    event.preventDefault();
-
-    // @ts-ignore
-    const text = (event.clipboardData || window.clipboardData).getData('text');
-    const parsed = parsePastedText(text);
-    const input = rootNode.lastChild as HTMLInputElement;
-    // if only one email in clipboard then put the value in input
-    if (parsed.length < 2) {
-      parsed[0] && (input.value = parsed[0]);
-      return;
-    }
-    // otherwise add them all immediately
-    // add new emails without re-rendering existing ones
-    parsed.forEach(item => {
-      const { div, email } = EmailNode.create(item);
-      rootNode.insertBefore(div, input);
-      // add email to local list
-      emailList.push(email);
-    });
-
-    // const selection = window.getSelection();
-    // if (!selection.rangeCount) return false;
-    // selection.deleteFromDocument();
-    // selection.getRangeAt(0).insertNode(document.createTextNode(paste));
-    //
-    // event.preventDefault();
-  };
-
-  const _setEventListeners = () => {
-    // keyup -> _onKeyUp -> if (comma|Enter) -> _dispatchCompleteInput -> _convertInputToNode
-    rootNode.addEventListener('keyup', _onKeyUp);
-
-    // focusout -> _onFocusout -> _dispatchCompleteInput -> _convertInputToNode
-    rootNode.addEventListener('focusout', _onFocusout);
-
+  const _setDynamicEventListeners = () => {
     rootNode.addEventListener(COMPLETE_INPUT, _convertInputToNode);
-
-    // click -> _onClick -> check it is a delete element -> _dispatchDeleteEmailNode -> _deleteTargetEmail
-    rootNode.addEventListener('click', _onClick);
     rootNode.addEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
-
     // clipboard
-    rootNode.addEventListener('paste', _onPaste, true);
+    rootNode.addEventListener(
+      'paste',
+      EmailsInput._onPaste(rootNode, emailList),
+      true
+    );
   };
 
-  const _removeEventListeners = () => {
-    // in reverse order
-    rootNode.removeEventListener('paste', _onPaste, true);
+  const _removeDynamicEventListeners = () => {
     rootNode.removeEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
-    rootNode.removeEventListener('click', _onClick);
     rootNode.removeEventListener(COMPLETE_INPUT, _convertInputToNode);
-    rootNode.removeEventListener('focusout', _onFocusout);
-    rootNode.removeEventListener('keyup', _onKeyUp);
+    rootNode.removeEventListener(
+      'paste',
+      EmailsInput._onPaste(rootNode, emailList),
+      true
+    );
   };
 
-  const _validateIncomingEmails = (emails: string[] | any) => {
-    if (
-      !Array.isArray(emails) ||
-      emails.filter(email => typeof email !== 'string')[0]
-    ) {
-      _throwError(
-        'setEmails method expects an array of strings as an argument'
-      );
-    }
-  };
-
-  const _clearChildren = () => {
-    rootNode.innerHTML = '';
-  };
   const setEmails = (emails: string[]): void => {
     // do nothing if destroy method was called
     if (destroyed) {
       return;
     }
-    _validateIncomingEmails(emails);
-    _clearChildren();
-    emailList = [];
+    EmailsInput._validateIncomingEmails(emails);
+
+    // clear children
+    rootNode.innerHTML = '';
+    emailList.length = 0; // clears array without creating a new one (pointer remains)
     emails.forEach(email => {
       const { div: item, email: finalEmailString } = EmailNode.create(email);
       rootNode.appendChild<HTMLDivElement>(item);
@@ -243,7 +110,7 @@ export function EmailsInput(
     rootNode.appendChild<HTMLInputElement>(InputNode.create());
     // .scrollIntoView();
 
-    _fireOnEmailsChange();
+    EmailsInput._fireOnEmailsChange(emailsChangeObservers, getEmails());
   };
 
   const _applyConfig = (config: Partial<Config>) => {
@@ -262,7 +129,9 @@ export function EmailsInput(
   const onEmailsChange = (callback: EmailChangeCallbackFn): UnsubscribeFn => {
     // validate argument
     if (!isFunction(callback)) {
-      _throwError('onEmailsChange method expects a function as an argument');
+      EmailsInput._throwError(
+        'onEmailsChange method expects a function as an argument'
+      );
     }
 
     emailsChangeObservers.add(callback);
@@ -281,30 +150,33 @@ export function EmailsInput(
       return false;
     }
     destroyed = true;
-    _removeEventListeners();
+    EmailsInput._removeStaticEventListeners(rootNode);
+    _removeDynamicEventListeners();
     // remove observers
     emailsChangeObservers.clear();
     // clean up containerNode
     containerNode.innerHTML = '';
     // clean up emailList
-    emailList = [];
+    emailList.length = 0;
     return true;
   };
 
   const _constructor = () => {
-    emailList = [];
-    _validateFirstArgument(containerNode);
-    _validateSecondArgument(config);
+    emailList.length = 0;
+    EmailsInput._validateFirstArgument(containerNode);
+    EmailsInput._validateSecondArgument(config);
     // clean up containerNode content
     containerNode.innerHTML = '';
     // create rootNode and append it to container
     rootNode = document.createElement('div');
     containerNode.appendChild(rootNode);
-    _addInputNode();
+    // add InputNode
+    rootNode.appendChild<HTMLInputElement>(InputNode.create());
     _applyConfig(config);
     // set style to root container
     rootNode.classList.add(styles.emailsInput);
-    _setEventListeners();
+    EmailsInput._setStaticEventListeners(rootNode);
+    _setDynamicEventListeners();
   };
 
   // call constructor before returning API
@@ -318,5 +190,145 @@ export function EmailsInput(
   };
 }
 
+EmailsInput._throwError = function(message: string) {
+  throw new Error(`EmailsInput : ${message}`);
+};
+
+EmailsInput._validateFirstArgument = function(node: any) {
+  if (!(node instanceof HTMLElement)) {
+    EmailsInput._throwError(
+      'constructor expects HTMLElement as the first argument'
+    );
+  }
+};
+EmailsInput._validateSecondArgument = function(config: Partial<Config> | any) {
+  if (!(config instanceof Object)) {
+    EmailsInput._throwError(
+      'constructor expects Object as the second argument'
+    );
+  }
+  const { defaultEmails, maxHeight, minHeight } = config;
+  // throw if 1) not an array (skip if undefined)  2) or array is not empty and at least one element is not a string
+  if (
+    (defaultEmails !== undefined && !Array.isArray(defaultEmails)) ||
+    (Array.isArray(defaultEmails) &&
+      defaultEmails?.length > 0 &&
+      defaultEmails?.filter((item: any) => typeof item !== 'string').length > 0)
+  ) {
+    EmailsInput._throwError(
+      'config.defaultEmails should be a type of string[]'
+    );
+  }
+
+  if (maxHeight !== undefined && typeof maxHeight !== 'string') {
+    EmailsInput._throwError('config.maxHeight should be a type of string');
+  }
+  if (minHeight !== undefined && typeof minHeight !== 'string') {
+    EmailsInput._throwError('config.minHeight should be a type of string');
+  }
+};
+EmailsInput._validateIncomingEmails = function(emails: string[] | any) {
+  if (
+    !Array.isArray(emails) ||
+    emails.filter(email => typeof email !== 'string')[0]
+  ) {
+    EmailsInput._throwError(
+      'setEmails method expects an array of strings as an argument'
+    );
+  }
+};
+EmailsInput._dispatchDeleteEmailNode = function(event: Event) {
+  const targetSpan: HTMLSpanElement = event.target as HTMLSpanElement;
+  const customEvent = new CustomEvent(DELETE_EMAIL_NODE, {
+    bubbles: true,
+  });
+  return targetSpan.dispatchEvent(customEvent);
+};
+EmailsInput._dispatchCompleteInput = function(target: HTMLInputElement) {
+  const customEvent = new CustomEvent(COMPLETE_INPUT, {
+    bubbles: true,
+  });
+  return target.dispatchEvent(customEvent);
+};
+EmailsInput._onKeyUp = function(event: KeyboardEvent) {
+  // keyCode and comparison with numbers are for backward compatibility with IE
+  // noinspection JSDeprecatedSymbols
+  const key = event.key || event.keyCode;
+  if (key === 'Enter' || key === 13 || key === ',' || key === 188) {
+    EmailsInput._dispatchCompleteInput(event.target as HTMLInputElement);
+  }
+};
+EmailsInput._onFocusout = function(event: Event) {
+  EmailsInput._dispatchCompleteInput(event.target as HTMLInputElement);
+};
+
+EmailsInput._onClick = function(event: MouseEvent) {
+  // call custom event only if clicked on cross character in email-node
+  const target: HTMLElement = event.target as HTMLElement;
+  if (EmailNode.isDeleteButton(target)) {
+    EmailsInput._dispatchDeleteEmailNode(event);
+  }
+};
+// this method is not covered with tests cause js-dom does not support ClipboardEvent
+// so the logic of parsing is moved to utils :: parsePastedText and covered with unit tests
+EmailsInput._onPaste = (rootNode: HTMLElement, emailList: string[]) => (
+  event: ClipboardEvent
+) => {
+  event.preventDefault();
+
+  // @ts-ignore
+  const text = (event.clipboardData || window.clipboardData).getData('text');
+  const parsed = parsePastedText(text);
+  const input = rootNode.lastChild as HTMLInputElement;
+  // if only one email in clipboard then put the value in input
+  if (parsed.length < 2) {
+    parsed[0] && (input.value = parsed[0]);
+    return;
+  }
+  // otherwise add them all immediately
+  // add new emails without re-rendering existing ones
+  parsed.forEach(item => {
+    const { div, email } = EmailNode.create(item);
+    rootNode.insertBefore(div, input);
+    // add email to local list
+    emailList.push(email);
+  });
+};
+/**
+ * notify all emailsChangeObservers
+ * this method is called when emailsList is changed
+ *
+ */
+EmailsInput._fireOnEmailsChange = function(
+  emailsChangeObservers: Set<EmailChangeCallbackFn>,
+  emailList: string[]
+) {
+  emailsChangeObservers.forEach((callback: EmailChangeCallbackFn) => {
+    callback.call(null, emailList);
+  });
+};
+EmailsInput._setStaticEventListeners = function(rootNode: HTMLElement) {
+  // keyup -> _onKeyUp -> if (comma|Enter) -> _dispatchCompleteInput -> _convertInputToNode
+  rootNode.addEventListener('keyup', EmailsInput._onKeyUp);
+
+  // focusout -> _onFocusout -> _dispatchCompleteInput -> _convertInputToNode
+  rootNode.addEventListener('focusout', EmailsInput._onFocusout);
+
+  // click -> _onClick -> check it is a delete element -> _dispatchDeleteEmailNode -> _deleteTargetEmail
+  rootNode.addEventListener('click', EmailsInput._onClick);
+};
+EmailsInput._removeStaticEventListeners = function(rootNode: HTMLElement) {
+  rootNode.removeEventListener('click', EmailsInput._onClick);
+  rootNode.removeEventListener('focusout', EmailsInput._onFocusout);
+  rootNode.removeEventListener('keyup', EmailsInput._onKeyUp);
+};
+
+// hides access to all static methods available directly like EmailsInput.<name>
+function wrapper(
+  containerNode: HTMLElement,
+  config: Partial<Config> = {}
+): EmailsInputAPI {
+  return EmailsInput(containerNode, config);
+}
 // @ts-ignore
-window['EmailsInput'] = EmailsInput;
+window['EmailsInput'] = wrapper;
