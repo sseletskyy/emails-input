@@ -19,15 +19,57 @@
               Share <strong>Board Name</strong> with others
             </div>
             <p class="comment">
-              uses 100% of width and height of the parent element
+              uses 100% of width and height of the parent element (instance of
+              emails-input.js)
             </p>
             <div class="emails-input-0"></div>
-
-            <p class="comment">set min-height: 2rem and max-height: 8rem</p>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="footer-container">
+            <button class="button add-email-0">Add Email</button>
+            <button class="button get-valid-emails-count-0">
+              Get Emails Counts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="emails-input-panel">
+        <div class="header">
+          <div class="header-container">
+            <div class="title">
+              Share <strong>Board Name</strong> with others
+            </div>
+            <p class="comment">
+              set min-height: 2rem and max-height: 8rem (instance of
+              emails-input.js)
+            </p>
             <div class="emails-input-1"></div>
-            <br />
-            <br />
-            <p class="comment">wrapped in a fixed-size container</p>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="footer-container">
+            <button class="button add-email-1">Add Email</button>
+            <button class="button get-valid-emails-count-1">
+              Get Emails Counts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="emails-input-panel">
+        <div class="header">
+          <div class="header-container">
+            <div class="title">
+              Share <strong>Board Name</strong> with others
+            </div>
+            <p class="comment">
+              wrapped in a fixed-size container (instance of
+              emails-input-class.js)
+            </p>
             <div
               class="emails-input-2"
               style="width: 400px; height: 200px; border: 1px dashed orange;padding:1px;"
@@ -36,16 +78,16 @@
         </div>
         <div class="footer">
           <div class="footer-container">
-            <button class="button add-email">Add Email</button>
-            <button class="button get-valid-emails-count">
+            <button class="button add-email-2">Add Email</button>
+            <button class="button get-valid-emails-count-2">
               Get Emails Counts
             </button>
-            <p class="comment">buttons work for the first component</p>
           </div>
         </div>
       </div>
     </div>
-    <script src="emails-input.bundle.js"></script>
+    <script src="emails-input.js"></script>
+    <script src="emails-input-class.js"></script>
     <script type="application/javascript">
       function main() {
         const config = {
@@ -65,16 +107,13 @@
           document.querySelector('.emails-input-1'),
           config
         );
-        const emailInput3 = EmailsInput(
+        const emailInput3 = EmailsInputClass(
           document.querySelector('.emails-input-2')
         );
 
         emailInput2.setEmails(['adam@miro.com', 'eva@miro.com']);
 
         // use case Get Valid Emails Count
-        const countBtn = document.querySelector(
-          'button.get-valid-emails-count'
-        );
         function countClickHandler(instance) {
           return function() {
             const emails = instance.getEmails();
@@ -87,10 +126,18 @@
             );
           };
         }
-        countBtn.addEventListener('click', countClickHandler(emailInput));
+        // use case Count valid emails
+        document
+          .querySelector('button.get-valid-emails-count-0')
+          .addEventListener('click', countClickHandler(emailInput));
+        document
+          .querySelector('button.get-valid-emails-count-1')
+          .addEventListener('click', countClickHandler(emailInput2));
+        document
+          .querySelector('button.get-valid-emails-count-2')
+          .addEventListener('click', countClickHandler(emailInput3));
 
         // use case Add Random email
-        const addEmailBtn = document.querySelector('button.add-email');
         function randomEmail() {
           return [
             'random_',
@@ -106,7 +153,15 @@
             instance.setEmails(emails);
           };
         }
-        addEmailBtn.addEventListener('click', addEmailClickHandler(emailInput));
+        document
+          .querySelector('button.add-email-0')
+          .addEventListener('click', addEmailClickHandler(emailInput));
+        document
+          .querySelector('button.add-email-1')
+          .addEventListener('click', addEmailClickHandler(emailInput2));
+        document
+          .querySelector('button.add-email-2')
+          .addEventListener('click', addEmailClickHandler(emailInput3));
       }
       document.addEventListener('DOMContentLoaded', main, false);
     </script>

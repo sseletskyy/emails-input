@@ -13,13 +13,14 @@ module.exports = {
   entry: {
     index: './src/index.ts',
     'emails-input': './src/emails-input/emails-input.ts',
+    'emails-input-class': './src/emails-input/emails-input-class.ts',
   },
   mode: 'development',
   resolve: {
     extensions: ['.ts', '.js'],
   },
   output: {
-    filename: '[name].bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'docs'),
   },
   devServer: {

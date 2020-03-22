@@ -3,33 +3,17 @@ import styles from './styles';
 import { EmailNode } from './email-node';
 import { InputNode } from './input-node';
 import { isFunction, parsePastedText, validateEmail } from './utils';
+import {
+  Config,
+  EmailChangeCallbackFn,
+  EmailsInputAPI,
+  UnsubscribeFn,
+} from './interfaces';
 
 polyfills(); // support IE11
 // custom events
 export const COMPLETE_INPUT = 'emails-input--complete-input-node';
 export const DELETE_EMAIL_NODE = 'emails-input--delete-email-node';
-
-interface EmailChangeCallbackFn {
-  (emails: string[]): void;
-}
-interface UnsubscribeFn {
-  (): void;
-}
-
-export interface EmailsInputAPI {
-  getEmails: () => string[];
-  setEmails: (emails: string[]) => void;
-  onEmailsChange: (callback: EmailChangeCallbackFn) => UnsubscribeFn;
-  // extra method
-  isEmailValid: (email: string) => boolean;
-  destroy: () => void;
-}
-
-export interface Config {
-  defaultEmails: string[];
-  maxHeight: string;
-  minHeight: string;
-}
 
 export function EmailsInput(
   containerNode: HTMLElement,
@@ -256,7 +240,8 @@ export function EmailsInput(
       // add the same email string (as it is in email node) to emailList
       emailList.push(finalEmailString);
     });
-    rootNode.appendChild<HTMLInputElement>(InputNode.create()).scrollIntoView();
+    rootNode.appendChild<HTMLInputElement>(InputNode.create());
+    // .scrollIntoView();
 
     _fireOnEmailsChange();
   };

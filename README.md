@@ -302,11 +302,32 @@ cancelCallback();
 
 `npm run build` - to build production version of the code in the folder `docs`
 
-- Webpack will create two bundle files and one archive:
-  - `index.bundle.js` - contains parent container layout and example javascript code for the `index.html`
-  - `emails-input.bundle.js` - contains the component with included css styles
-  - `emails-input.bubdle.js.gz` - compressed version of the component
+- Webpack will create three bundle files and two archives:
+  - `index.js` - contains parent container layout and example javascript code for the `index.html`
+  - `emails-input.js` - contains the component with included css styles
+  - `emails-input.js.gz` - compressed version of the component
+  - `emails-input-class.js` - contains the alternative implementation of the same component (class approach)
+  - `emails-input-class.js.gz` - compressed version of the alternative component
 
 `npm run build:analyzer` - to build production version of the code and open webpack analyzer in the browser
 
 `npm run format` - to run `prettier` with flag --write for all files in `./src`
+
+
+### Alternative version
+
+Initially I've created the component by using object approach. That approach provides two major benefits:
+* no need to deal with `this`
+* easy to hide private methods and properties
+* it's not possible to change behavior of the component via Object.prototype
+
+It has only one major drawback - memory footprint. Two instances have their own copies of all methods.
+
+So I decided to implement another copy using class approach - `emails-input-class.ts`
+I used the same test suite to check that the second implementation complies with the same specification requirements.
+
+When the script `emails-input-class.js` is loaded, it adds a global variable `EmailsInputClass` which is a constructor function
+
+```
+window.EmailsInputClass
+```
