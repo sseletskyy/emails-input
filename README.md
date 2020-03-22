@@ -319,7 +319,6 @@ cancelCallback();
 Initially I've created the component by using object approach. That approach provides two major benefits:
 * no need to deal with `this`
 * easy to hide private methods and properties
-* it's not possible to change behavior of the component via Object.prototype
 
 It has only one major drawback - memory footprint. Two instances have their own copies of all methods.
 
