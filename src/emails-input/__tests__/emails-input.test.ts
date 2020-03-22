@@ -1,5 +1,5 @@
 import { EmailsInput, EmailsInputAPI, COMPLETE_INPUT } from '../emails-input';
-import { getChildren } from '../test-helper';
+import { getChildren, getRootNode } from '../test-helper';
 import { isFunction } from '../utils';
 // scrollIntoView is not supported by jsdom
 window.HTMLElement.prototype.scrollIntoView = function() {};
@@ -96,7 +96,7 @@ describe('EmailsInput', () => {
         it('should set respective internal style to the root div', () => {
           const maxHeight = '500px';
           EmailsInput(divContainer, { maxHeight });
-          expect(divContainer.style.maxHeight).toEqual(maxHeight);
+          expect(getRootNode(divContainer).style.maxHeight).toEqual(maxHeight);
         });
       });
       describe('should support param [minHeight]', () => {
@@ -111,7 +111,7 @@ describe('EmailsInput', () => {
         it('should set respective internal style to the root div', () => {
           const minHeight = '100px';
           EmailsInput(divContainer, { minHeight });
-          expect(divContainer.style.minHeight).toEqual(minHeight);
+          expect(getRootNode(divContainer).style.minHeight).toEqual(minHeight);
         });
       });
     });
@@ -528,21 +528,21 @@ describe('EmailsInput', () => {
         expect(callbackTwo).toBeCalledTimes(1);
         expect(callbackTwo).toBeCalledWith(changeOne);
 
-		// round two - unsubscribe first, second should be notified
+        // round two - unsubscribe first, second should be notified
         unsubscribeFnOne();
-		instance.setEmails(changeTwo);
-		expect(callbackOne).toBeCalledTimes(1);
-		expect(callbackOne).toHaveBeenLastCalledWith(changeOne);
-		expect(callbackTwo).toBeCalledTimes(2);
-		expect(callbackTwo).toHaveBeenLastCalledWith(changeTwo);
+        instance.setEmails(changeTwo);
+        expect(callbackOne).toBeCalledTimes(1);
+        expect(callbackOne).toHaveBeenLastCalledWith(changeOne);
+        expect(callbackTwo).toBeCalledTimes(2);
+        expect(callbackTwo).toHaveBeenLastCalledWith(changeTwo);
 
-		// round three - unsubscribe second, none should be notified
-		unsubscribeFnTwo();
-		instance.setEmails(changeThree);
-		expect(callbackOne).toBeCalledTimes(1);
-		expect(callbackOne).toHaveBeenLastCalledWith(changeOne);
-		expect(callbackTwo).toBeCalledTimes(2);
-		expect(callbackTwo).toHaveBeenLastCalledWith(changeTwo);
+        // round three - unsubscribe second, none should be notified
+        unsubscribeFnTwo();
+        instance.setEmails(changeThree);
+        expect(callbackOne).toBeCalledTimes(1);
+        expect(callbackOne).toHaveBeenLastCalledWith(changeOne);
+        expect(callbackTwo).toBeCalledTimes(2);
+        expect(callbackTwo).toHaveBeenLastCalledWith(changeTwo);
       });
     });
   });

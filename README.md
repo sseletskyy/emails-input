@@ -94,8 +94,8 @@ Email validation is implemented with RegExp from [W3C documentation](<https://ht
 
 ## Component behavior
 
-- Component depends on the parent container’s width
-- If parent width changes, inserted emails are redistributed by rows
+- Component depends on the parent container’s width and height
+- If parent width or height changes, inserted emails are redistributed by rows
 - Component's styles are defined with css modules, so they don't conflict with other css styles
 - If component has too many emails, user can scroll the component
 - The last block of the component is an `input field` to insert email manually

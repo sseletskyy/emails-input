@@ -34,6 +34,7 @@ export function EmailsInput(
   containerNode: HTMLElement,
   config: Partial<Config> = {}
 ): EmailsInputAPI {
+  let rootNode: HTMLDivElement;
   let emailList: string[];
   const emailsChangeObservers: EmailChangeCallbackFn[] = [];
 
@@ -71,7 +72,7 @@ export function EmailsInput(
   };
 
   const _addInputNode = () => {
-    containerNode.appendChild<HTMLInputElement>(InputNode.create());
+    rootNode.appendChild<HTMLInputElement>(InputNode.create());
   };
 
   /**
@@ -170,7 +171,7 @@ export function EmailsInput(
     // @ts-ignore
     const text = (event.clipboardData || window.clipboardData).getData('text');
     const parsed = parsePastedText(text);
-    const input = containerNode.lastChild as HTMLInputElement;
+    const input = rootNode.lastChild as HTMLInputElement;
     // if only one email in clipboard then put the value in input
     if (parsed.length < 2) {
       parsed[0] && (input.value = parsed[0]);
@@ -180,7 +181,7 @@ export function EmailsInput(
     // add new emails without re-rendering existing ones
     parsed.forEach(item => {
       const { div, email } = EmailNode.create(item);
-      containerNode.insertBefore(div, input);
+      rootNode.insertBefore(div, input);
       // add email to local list
       emailList.push(email);
     });
@@ -195,19 +196,19 @@ export function EmailsInput(
 
   const _setEventListeners = () => {
     // keyup -> _onKeyUp -> if (comma|Enter) -> _dispatchCompleteInput -> _convertInputToNode
-    containerNode.addEventListener('keyup', _onKeyUp);
+    rootNode.addEventListener('keyup', _onKeyUp);
 
     // focusout -> _onFocusout -> _dispatchCompleteInput -> _convertInputToNode
-    containerNode.addEventListener('focusout', _onFocusout);
+    rootNode.addEventListener('focusout', _onFocusout);
 
-    containerNode.addEventListener(COMPLETE_INPUT, _convertInputToNode);
+    rootNode.addEventListener(COMPLETE_INPUT, _convertInputToNode);
 
     // click -> _onClick -> check it is a delete element -> _dispatchDeleteEmailNode -> _deleteTargetEmail
-    containerNode.addEventListener('click', _onClick);
-    containerNode.addEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
+    rootNode.addEventListener('click', _onClick);
+    rootNode.addEventListener(DELETE_EMAIL_NODE, _deleteTargetEmail);
 
     // clipboard
-    containerNode.addEventListener('paste', _onPaste, true);
+    rootNode.addEventListener('paste', _onPaste, true);
   };
 
   const _validateIncomingEmails = (emails: string[] | any) => {
@@ -222,7 +223,7 @@ export function EmailsInput(
   };
 
   const _clearChildren = () => {
-    containerNode.innerHTML = '';
+    rootNode.innerHTML = '';
   };
   const setEmails = (emails: string[]): void => {
     _validateIncomingEmails(emails);
@@ -230,13 +231,11 @@ export function EmailsInput(
     emailList = [];
     emails.forEach(email => {
       const { div: item, email: finalEmailString } = EmailNode.create(email);
-      containerNode.appendChild<HTMLDivElement>(item);
+      rootNode.appendChild<HTMLDivElement>(item);
       // add the same email string (as it is in email node) to emailList
       emailList.push(finalEmailString);
     });
-    containerNode
-      .appendChild<HTMLInputElement>(InputNode.create())
-      .scrollIntoView();
+    rootNode.appendChild<HTMLInputElement>(InputNode.create()).scrollIntoView();
 
     _fireOnEmailsChange();
   };
@@ -247,10 +246,10 @@ export function EmailsInput(
       setEmails(defaultEmails);
     }
     if (maxHeight) {
-      containerNode.style.maxHeight = maxHeight;
+      rootNode.style.maxHeight = maxHeight;
     }
     if (minHeight) {
-      containerNode.style.minHeight = minHeight;
+      rootNode.style.minHeight = minHeight;
     }
   };
 
@@ -274,10 +273,13 @@ export function EmailsInput(
     emailList = [];
     _validateFirstArgument(containerNode);
     _validateSecondArgument(config);
+    // create rootNode and append it to container
+    rootNode = document.createElement('div');
+    containerNode.appendChild(rootNode);
     _addInputNode();
     _applyConfig(config);
-    // set style to container
-    containerNode.classList.add(styles.emailsInput);
+    // set style to root container
+    rootNode.classList.add(styles.emailsInput);
     _setEventListeners();
   };
 

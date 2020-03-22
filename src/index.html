@@ -18,27 +18,20 @@
             <div class="title">
               Share <strong>Board Name</strong> with others
             </div>
-            <div class="emails-input">
-              <div class="email email--state-valid">
-                john@miro.com<span class="delete">&#10005;</span>
-              </div>
-              <div class="email email--state-invalid">
-                michael@miro<span class="delete">&#10005;</span>
-              </div>
-              <div class="email email--state-valid">
-                john@miro.com<span class="delete">&#10005;</span>
-              </div>
-              <div class="email email--state-invalid">
-                michael@miro<span class="delete">&#10005;</span>
-              </div>
-              <input
-                class="email email--state-input"
-                placeholder="add more people..."
-                type="text"
-              />
-            </div>
+            <p class="comment">
+              uses 100% of width and height of the parent element
+            </p>
+            <div class="emails-input-0"></div>
+
+            <p class="comment">set min-height: 2rem and max-height: 8rem</p>
+            <div class="emails-input-1"></div>
             <br />
-            <div id="emails-input"></div>
+            <br />
+            <p class="comment">wrapped in a fixed-size container</p>
+            <div
+              class="emails-input-2"
+              style="width: 400px; height: 200px; border: 1px dashed orange;padding:1px;"
+            ></div>
           </div>
         </div>
         <div class="footer">
@@ -47,6 +40,7 @@
             <button class="button get-valid-emails-count">
               Get Emails Counts
             </button>
+            <p class="comment">buttons work for the first component</p>
           </div>
         </div>
       </div>
@@ -55,15 +49,27 @@
     <script type="application/javascript">
       function main() {
         const config = {
-          defaultEmails: ['john@miro.com', 'valid@email', 'mike@miro.com', 'incorrect'],
-          maxHeight: '5rem',
-          minHeight: '1rem',
+          defaultEmails: [
+            'john@miro.com',
+            'valid@email',
+            'mike@miro.com',
+            'incorrect',
+          ],
+          maxHeight: '8rem',
+          minHeight: '2rem',
         };
         const emailInput = EmailsInput(
-          document.querySelector('#emails-input'),
+          document.querySelector('.emails-input-0')
+        );
+        const emailInput2 = EmailsInput(
+          document.querySelector('.emails-input-1'),
           config
         );
-        // emailInput.setEmails();
+        const emailInput3 = EmailsInput(
+          document.querySelector('.emails-input-2')
+        );
+
+        emailInput2.setEmails(['adam@miro.com', 'eva@miro.com']);
 
         // use case Get Valid Emails Count
         const countBtn = document.querySelector(

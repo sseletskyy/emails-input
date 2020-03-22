@@ -8,8 +8,8 @@ const styles = css`
 
   .emailsInput {
     width: 100%;
-    min-height: 96px;
-    max-height: 180px;
+    height: 100%;
+    box-sizing: border-box;
     overflow-y: auto;
     background: #ffffff;
     border: 1px solid #c3c2cf;
