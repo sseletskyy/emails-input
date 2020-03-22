@@ -273,6 +273,8 @@ export function EmailsInput(
     emailList = [];
     _validateFirstArgument(containerNode);
     _validateSecondArgument(config);
+    // clean up containerNode content
+    containerNode.innerHTML = '';
     // create rootNode and append it to container
     rootNode = document.createElement('div');
     containerNode.appendChild(rootNode);

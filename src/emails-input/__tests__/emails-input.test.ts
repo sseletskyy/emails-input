@@ -128,6 +128,17 @@ describe('EmailsInput', () => {
       expect(children.length).toEqual(1);
       checkNodeIsAnInput(children[0]);
     });
+    it('should clean up the content of the divContainer before adding itself', () => {
+      // arrange
+      divContainer = document.querySelector('#emails-input');
+      divContainer.innerHTML = '<p>element one</p><p>element two</p>';
+      // preliminary assert
+      expect(divContainer.children.length).toEqual(2);
+      // act
+      instance = EmailsInput(divContainer);
+      // assert
+      expect(divContainer.children.length).toEqual(1);
+    });
     describe('input node should provide the following behavior', () => {
       describe('email node should be created because of the custom event is dispatched', () => {
         it('when Enter pressed', () => {

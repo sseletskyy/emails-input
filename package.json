@@ -10,7 +10,7 @@
     "start:open": "webpack-dev-server --open",
     "start": "webpack-dev-server",
     "build:dev": "webpack --mode development",
-    "build": "webpack --mode production",
+    "build": "webpack --mode production && cp ./src/experiment.html ./docs",
 	"build:analyzer": "ENABLE_WEBPACK_ANALYZER=true npm run build",
     "format": "npx prettier 'src/**/*.{ts,js,less,html}' --write"
   },
