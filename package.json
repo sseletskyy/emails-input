@@ -1,7 +1,7 @@
 {
-  "name": "email-input",
+  "name": "emails-input",
   "version": "1.0.0",
-  "description": "",
+  "description": "vanilla js multiple emails input component",
   "private": true,
   "scripts": {
     "test": "jest",
